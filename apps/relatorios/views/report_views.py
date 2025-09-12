@@ -10,3 +10,6 @@ class RelatorioProjetosView(LoginRequiredMixin, TemplateView):
     
     def get(self, request, *args, **kwargs):
         return HttpResponse("Relatório de projetos - Em desenvolvimento")
+    
+class RelatorioCustomView(LoginRequiredMixin, TemplateView):
+    template_name = 'relatorios/relatorio_custom.html'

@@ -14,6 +14,6 @@ urlpatterns = [
     # path('contratos/inadimplencia/', report_views.RelatorioInadimplenciaView.as_view(), name='relatorio_inadimplencia'),
     # path('financeiro/', report_views.RelatorioFinanceiroView.as_view(), name='relatorio_financeiro'),
     # path('financeiro/pdf/', report_views.RelatorioFinanceiroPDFView.as_view(), name='relatorio_financeiro_pdf'),
-    # path('custom/', report_views.RelatorioCustomView.as_view(), name='relatorio_custom'),
+    path('custom/', report_views.RelatorioCustomView.as_view(), name='relatorio_custom'),
     # path('custom/generate/', report_views.RelatorioCustomGenerateView.as_view(), name='relatorio_custom_generate'),
 ]
