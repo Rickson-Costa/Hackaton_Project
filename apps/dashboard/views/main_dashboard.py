@@ -16,212 +16,235 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         hoje = timezone.now().date()
         
-        # ====== MÉTRICAS DE PROJETOS ======
+        # ====== MÉTRICAS PRINCIPAIS (KPIs) ======
         projetos = Projeto.objects.all()
-        context['metricas_projetos'] = {
-            'total': projetos.count(),
-            'em_andamento': projetos.filter(situacao='2').count(),
-            'atrasados': projetos.filter(
-                situacao__in=['1', '2'],
-                data_encerramento__lt=hoje
-            ).count(),
-            'concluidos': projetos.filter(situacao='6').count(),
-            'valor_total': projetos.aggregate(Sum('valor'))['valor__sum'] or 0,
-        }
-        
-        # ====== MÉTRICAS DE CONTRATOS ======
         contratos = Contrato.objects.all()
         contratos_pf = contratos.filter(tipo_pessoa=1)
         contratos_pj = contratos.filter(tipo_pessoa=2)
         
-        context['metricas_contratos'] = {
-            'total': contratos.count(),
-            'pessoa_fisica': contratos_pf.count(),
-            'pessoa_juridica': contratos_pj.count(),
-            'valor_total': contratos.aggregate(Sum('valor'))['valor__sum'] or 0,
-        }
+        # Projetos
+        projetos_ativos = projetos.filter(situacao='2').count()
+        projetos_atrasados = projetos.filter(
+            situacao__in=['1', '2'],
+            data_encerramento__lt=hoje
+        ).count()
         
-        # ====== ANÁLISE DE INADIMPLÊNCIA ======
+        # Contratos PF
+        contratos_pf_ativos = contratos_pf.filter(situacao__in=['1', '2']).count()
+        contratos_pf_pendentes = ItemContrato.objects.filter(
+            num_contrato__tipo_pessoa=1,
+            situacao='1'
+        ).count()
+        
+        # Contratos PJ
+        contratos_pj_ativos = contratos_pj.filter(situacao__in=['1', '2']).count()
+        contratos_pj_vencidos = contratos_pj.filter(
+            data_fim__lt=hoje,
+            situacao='2'
+        ).count()
+        
+        # Inadimplência Total
         parcelas_vencidas = ItemContrato.objects.filter(
-            situacao='1',  # Lançado (não pago)
+            situacao='1',
             data_vencimento__lt=hoje
         )
+        valor_inadimplencia = sum(
+            (parcela.valor_parcela - parcela.valor_pago) 
+            for parcela in parcelas_vencidas
+        )
+        valor_total_contratos = contratos.aggregate(Sum('valor'))['valor__sum'] or 1
+        percentual_inadimplencia = (valor_inadimplencia / valor_total_contratos * 100) if valor_total_contratos > 0 else 0
         
-        inadimplencia = {
-            '0-30': {'count': 0, 'valor': Decimal('0')},
-            '31-60': {'count': 0, 'valor': Decimal('0')},
-            '61-90': {'count': 0, 'valor': Decimal('0')},
-            '90+': {'count': 0, 'valor': Decimal('0')},
+        context['kpis'] = {
+            'projetos_ativos': projetos_ativos,
+            'projetos_crescimento': self._calcular_crescimento_projetos(),
+            'contratos_pf_total': contratos_pf.count(),
+            'contratos_pf_ativos': contratos_pf_ativos,
+            'contratos_pf_pendentes': contratos_pf_pendentes,
+            'contratos_pj_total': contratos_pj.count(),
+            'contratos_pj_ativos': contratos_pj_ativos,
+            'contratos_pj_vencidos': contratos_pj_vencidos,
+            'valor_inadimplencia': float(valor_inadimplencia),
+            'percentual_inadimplencia': float(percentual_inadimplencia),
         }
         
-        for parcela in parcelas_vencidas:
-            dias_atraso = (hoje - parcela.data_vencimento).days
-            valor_pendente = parcela.valor_parcela - parcela.valor_pago
-            
-            if dias_atraso <= 30:
-                periodo = '0-30'
-            elif dias_atraso <= 60:
-                periodo = '31-60'
-            elif dias_atraso <= 90:
-                periodo = '61-90'
-            else:
-                periodo = '90+'
-            
-            inadimplencia[periodo]['count'] += 1
-            inadimplencia[periodo]['valor'] += valor_pendente
-        
-        context['inadimplencia'] = inadimplencia
-        
-        # ====== SEMÁFOROS (PRAZO, CUSTO, ESCOPO) ======
-        semaforos = []
-        
-        for projeto in projetos.filter(situacao__in=['1', '2']):
-            # Análise de Prazo
-            dias_restantes = (projeto.data_encerramento - hoje).days
-            dias_totais = (projeto.data_encerramento - projeto.data_inicio).days
-            percentual_prazo = ((dias_totais - dias_restantes) / dias_totais * 100) if dias_totais > 0 else 0
-            
-            if dias_restantes < 0:
-                status_prazo = 'vermelho'
-            elif dias_restantes <= 7:
-                status_prazo = 'amarelo'
-            else:
-                status_prazo = 'verde'
-            
-            # Análise de Custo (usando valor realizado)
-            if hasattr(projeto, 'valor_realizado'):
-                percentual_custo = (projeto.valor_realizado / projeto.valor * 100) if projeto.valor > 0 else 0
-                if percentual_custo > 100:
-                    status_custo = 'vermelho'
-                elif percentual_custo > 90:
-                    status_custo = 'amarelo'
-                else:
-                    status_custo = 'verde'
-            else:
-                status_custo = 'verde'
-            
-            # Análise de Escopo (baseado nas requisições)
-            total_requisicoes = projeto.requisicoes.count()
-            requisicoes_concluidas = projeto.requisicoes.filter(situacao='5').count()
-            percentual_escopo = (requisicoes_concluidas / total_requisicoes * 100) if total_requisicoes > 0 else 0
-            
-            if percentual_escopo < 50 and percentual_prazo > 70:
-                status_escopo = 'vermelho'
-            elif percentual_escopo < 70 and percentual_prazo > 50:
-                status_escopo = 'amarelo'
-            else:
-                status_escopo = 'verde'
-            
-            semaforos.append({
-                'projeto': projeto,
-                'prazo': status_prazo,
-                'custo': status_custo,
-                'escopo': status_escopo,
-                'dias_restantes': dias_restantes,
-                'percentual_custo': percentual_custo,
-                'percentual_escopo': percentual_escopo,
-            })
-        
-        context['semaforos'] = semaforos
-        
-        # ====== ALERTAS CRÍTICOS ======
-        alertas = []
-        
-        # Projetos atrasados
-        for projeto in projetos.filter(situacao__in=['1', '2'], data_encerramento__lt=hoje):
-            dias_atraso = (hoje - projeto.data_encerramento).days
-            alertas.append({
-                'tipo': 'danger',
-                'titulo': f'Projeto #{projeto.cod_projeto} - ATRASADO',
-                'mensagem': f'{projeto.nome} - {dias_atraso} dias de atraso',
-                'icone': 'exclamation-triangle'
-            })
-        
-        # Parcelas vencidas há mais de 30 dias
-        for parcela in parcelas_vencidas.filter(data_vencimento__lt=hoje - timedelta(days=30)):
-            dias_atraso = (hoje - parcela.data_vencimento).days
-            alertas.append({
-                'tipo': 'warning',
-                'titulo': f'Parcela Vencida - {parcela.num_contrato.contratado}',
-                'mensagem': f'R$ {parcela.valor_parcela} - {dias_atraso} dias de atraso',
-                'icone': 'dollar-sign'
-            })
-        
-        # Ordens próximas do vencimento
-        for ordem in Ordem.objects.filter(
-            situacao__in=['1', '2'],
-            data_limite__lte=hoje + timedelta(days=3),
-            data_limite__gte=hoje
-        ):
-            dias_restantes = (ordem.data_limite - hoje).days
-            alertas.append({
-                'tipo': 'info',
-                'titulo': f'OS #{ordem.cod_ordem} - Prazo Próximo',
-                'mensagem': f'{ordem.descricao[:50]} - {dias_restantes} dias restantes',
-                'icone': 'clock'
-            })
-        
-        context['alertas'] = alertas[:10]  # Limitar a 10 alertas
-        
-        # ====== DADOS PARA GRÁFICOS ======
-        
-        # Gráfico de Situação dos Projetos
-        situacao_projetos = projetos.values('situacao').annotate(count=Count('cod_projeto'))
-        context['grafico_situacao_projetos'] = {
-            'labels': [dict(Projeto.SITUACAO_CHOICES).get(s['situacao'], s['situacao']) for s in situacao_projetos],
-            'data': [s['count'] for s in situacao_projetos]
-        }
-        
-        # Gráfico Previsto vs Realizado (últimos 6 meses)
-        meses = []
+        # ====== GRÁFICO PREVISTO VS REALIZADO ======
+        meses_labels = []
         valores_previstos = []
         valores_realizados = []
         
         for i in range(6):
             mes = hoje - timedelta(days=30*i)
-            meses.insert(0, mes.strftime('%b/%Y'))
+            meses_labels.insert(0, mes.strftime('%b'))
             
-            # Valor previsto (soma dos contratos do mês)
+            # Valores dos contratos do mês
             contratos_mes = Contrato.objects.filter(
                 data_inicio__year=mes.year,
                 data_inicio__month=mes.month
             )
-            valor_previsto = contratos_mes.aggregate(Sum('valor'))['valor__sum'] or 0
-            valores_previstos.insert(0, float(valor_previsto))
+            previsto = contratos_mes.aggregate(Sum('valor'))['valor__sum'] or 0
+            valores_previstos.insert(0, float(previsto))
             
-            # Valor realizado (soma dos pagamentos do mês)
+            # Pagamentos realizados no mês
             pagamentos_mes = ItemContrato.objects.filter(
                 data_pagamento__year=mes.year,
                 data_pagamento__month=mes.month
             )
-            valor_realizado = pagamentos_mes.aggregate(Sum('valor_pago'))['valor_pago__sum'] or 0
-            valores_realizados.insert(0, float(valor_realizado))
+            realizado = pagamentos_mes.aggregate(Sum('valor_pago'))['valor_pago__sum'] or 0
+            valores_realizados.insert(0, float(realizado))
         
         context['grafico_previsto_realizado'] = {
-            'labels': meses,
+            'labels': meses_labels,
             'previsto': valores_previstos,
-            'realizado': valores_realizados
+            'realizado': valores_realizados,
         }
         
-        # ====== TOP 5 PRESTADORES ======
-        top_prestadores = (
-            Contrato.objects
-            .values('contratado', 'cpf_cnpj', 'tipo_pessoa')
-            .annotate(
-                total_contratos=Count('num_contrato'),
-                valor_total=Sum('valor')
-            )
-            .order_by('-valor_total')[:5]
+        # ====== GRÁFICO STATUS DOS PROJETOS ======
+        status_counts = projetos.values('situacao').annotate(count=Count('cod_projeto'))
+        
+        status_map = {
+            '1': 'Aguardando',
+            '2': 'Em Andamento',
+            '3': 'Paralisado',
+            '4': 'Suspenso',
+            '5': 'Cancelado',
+            '6': 'Concluído'
+        }
+        
+        labels = []
+        data = []
+        for item in status_counts:
+            labels.append(status_map.get(item['situacao'], item['situacao']))
+            data.append(item['count'])
+        
+        context['grafico_status_projetos'] = {
+            'labels': labels,
+            'data': data,
+        }
+        
+        # ====== GRÁFICO VENCIMENTOS ======
+        vencimentos_data = []
+        vencimentos_labels = ['Hoje', 'Amanhã', '3 dias', '7 dias', '15 dias', '30 dias']
+        periodos = [0, 1, 3, 7, 15, 30]
+        
+        for dias in periodos:
+            data_check = hoje + timedelta(days=dias)
+            count = ItemContrato.objects.filter(
+                situacao='1',
+                data_vencimento=data_check
+            ).count()
+            vencimentos_data.append(count)
+        
+        context['grafico_vencimentos'] = {
+            'labels': vencimentos_labels,
+            'data': vencimentos_data,
+        }
+        
+        # ====== ALERTAS CRÍTICOS ======
+        alertas = []
+        
+        # Projetos com prazo crítico (vence em 7 dias ou menos)
+        projetos_criticos = projetos.filter(
+            situacao__in=['1', '2'],
+            data_encerramento__lte=hoje + timedelta(days=7),
+            data_encerramento__gte=hoje
         )
-        context['top_prestadores'] = top_prestadores
         
-        # ====== PRÓXIMAS PARCELAS A VENCER ======
-        proximas_parcelas = ItemContrato.objects.filter(
-            situacao='1',
-            data_vencimento__gte=hoje,
-            data_vencimento__lte=hoje + timedelta(days=30)
-        ).select_related('num_contrato').order_by('data_vencimento')[:10]
+        for projeto in projetos_criticos[:3]:
+            dias_restantes = (projeto.data_encerramento - hoje).days
+            alertas.append({
+                'tipo': 'danger' if dias_restantes <= 2 else 'warning',
+                'titulo': f'Projeto #{projeto.cod_projeto} - Prazo Crítico',
+                'mensagem': f'{projeto.nome[:30]} - Vence em {dias_restantes} dias',
+                'tempo': 'Agora'
+            })
         
-        context['proximas_parcelas'] = proximas_parcelas
+        # Parcelas vencidas
+        for parcela in parcelas_vencidas[:3]:
+            dias_atraso = (hoje - parcela.data_vencimento).days
+            alertas.append({
+                'tipo': 'warning',
+                'titulo': f'Contrato {parcela.num_contrato.num_contrato} - Parcela Vencida',
+                'mensagem': f'R$ {parcela.valor_parcela} - {dias_atraso} dias de atraso',
+                'tempo': 'Hoje'
+            })
+        
+        # Orçamentos estourados
+        projetos_estourados = projetos.filter(
+            valor_realizado__gt=F('valor')
+        )[:2]
+        
+        for projeto in projetos_estourados:
+            percentual = (projeto.valor_realizado / projeto.valor * 100) if projeto.valor > 0 else 0
+            alertas.append({
+                'tipo': 'info',
+                'titulo': 'Orçamento Estourado',
+                'mensagem': f'Projeto #{projeto.cod_projeto} - {percentual:.0f}% do orçamento utilizado',
+                'tempo': 'Ontem'
+            })
+        
+        context['alertas'] = alertas
+        
+        # ====== TABELA DE PROJETOS CRÍTICOS ======
+        projetos_tabela = []
+        
+        for projeto in projetos.filter(situacao__in=['1', '2'])[:5]:
+            # Status Prazo
+            if projeto.data_encerramento < hoje:
+                status_prazo = 'red'
+                prazo_texto = 'Atrasado'
+            elif (projeto.data_encerramento - hoje).days <= 7:
+                status_prazo = 'yellow'
+                prazo_texto = 'Próximo'
+            else:
+                status_prazo = 'green'
+                prazo_texto = 'No Prazo'
+            
+            # Status Custo
+            if hasattr(projeto, 'custo_realizado') and projeto.custo_previsto > 0:
+                percentual_custo = (projeto.custo_realizado / projeto.custo_previsto * 100)
+                if percentual_custo > 100:
+                    status_custo = 'red'
+                elif percentual_custo > 90:
+                    status_custo = 'yellow'
+                else:
+                    status_custo = 'green'
+                custo_texto = f'{percentual_custo:.0f}%'
+            else:
+                status_custo = 'green'
+                custo_texto = 'OK'
+            
+            projetos_tabela.append({
+                'codigo': projeto.cod_projeto,
+                'nome': projeto.nome[:30],
+                'cliente': projeto.cliente_nome[:20] if hasattr(projeto, 'cliente_nome') else 'N/A',
+                'status_prazo': status_prazo,
+                'prazo_texto': prazo_texto,
+                'status_custo': status_custo,
+                'custo_texto': custo_texto,
+                'status_geral': projeto.get_situacao_display(),
+            })
+        
+        context['projetos_tabela'] = projetos_tabela
         
         return context
+    
+    def _calcular_crescimento_projetos(self):
+        """Calcula crescimento percentual de projetos no mês"""
+        hoje = timezone.now().date()
+        inicio_mes = hoje.replace(day=1)
+        mes_anterior = (inicio_mes - timedelta(days=1)).replace(day=1)
+        
+        projetos_mes_atual = Projeto.objects.filter(
+            created_at__gte=inicio_mes
+        ).count()
+        
+        projetos_mes_anterior = Projeto.objects.filter(
+            created_at__gte=mes_anterior,
+            created_at__lt=inicio_mes
+        ).count()
+        
+        if projetos_mes_anterior > 0:
+            crescimento = ((projetos_mes_atual - projetos_mes_anterior) / projetos_mes_anterior * 100)
+            return round(crescimento, 1)
+        return 0
