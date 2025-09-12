@@ -18,45 +18,55 @@ class ItemContrato(models.Model):
         'contratos.Contrato',
         on_delete=models.CASCADE,
         related_name='itens',
-        verbose_name='Contrato'
+        verbose_name='Contrato',
+        db_column='numContrato'
     )
     cod_lancamento = models.IntegerField(
-        verbose_name='Código do Lançamento'
+        verbose_name='Código do Lançamento',
+        db_column='codLancamento'
     )
     data_lancamento = models.DateField(
-        verbose_name='Data de Lançamento'
+        verbose_name='Data de Lançamento',
+        db_column='dataLancamento'
     )
     num_parcela = models.IntegerField(
-        verbose_name='Número da Parcela'
+        verbose_name='Número da Parcela',
+        db_column='numParcela'
     )
     valor_parcela = models.DecimalField(
         max_digits=14,
         decimal_places=2,
-        verbose_name='Valor da Parcela'
+        verbose_name='Valor da Parcela',
+        db_column='valorParcela'
     )
     data_vencimento = models.DateField(
-        verbose_name='Data de Vencimento'
+        verbose_name='Data de Vencimento',
+        db_column='dataVencimento'
     )
     valor_pago = models.DecimalField(
         max_digits=14,
         decimal_places=2,
         default=0,
-        verbose_name='Valor Pago'
+        verbose_name='Valor Pago',
+        db_column='valorPago'
     )
     data_pagamento = models.DateField(
         verbose_name='Data de Pagamento',
         null=True,
-        blank=True
+        blank=True,
+        db_column='dataPagamento'
     )
     situacao = models.CharField(
         max_length=20,
         choices=SITUACAO_CHOICES,
         default='1',
-        verbose_name='Situação'
+        verbose_name='Situação',
+        db_column='situacao'
     )
     observacoes = models.TextField(
         'Observações',
-        blank=True
+        blank=True,
+        db_column='observacoes'
     )
     
     # Campos de auditoria básicos
@@ -64,6 +74,7 @@ class ItemContrato(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
+        db_table = 'item_contrato'
         verbose_name = 'Item do Contrato'
         verbose_name_plural = 'Itens do Contrato'
         ordering = ['num_parcela']

@@ -14,36 +14,43 @@ class Ordem(models.Model):
         ('4', 'Concluída'),
     ]
     
-    cod_ordem = models.AutoField(
+    cod_ordem = models.IntegerField(
         primary_key=True,
-        verbose_name='Código da Ordem'
+        verbose_name='Código da Ordem',
+        db_column='codOrdem'
     )
     cod_requisicao = models.ForeignKey(
         'projetos.Requisicao',
         on_delete=models.PROTECT,
         related_name='ordens',
-        verbose_name='Requisição'
+        verbose_name='Requisição',
+        db_column='codRequisicao'
     )
     descricao = models.CharField(
         max_length=500,
-        verbose_name='Descrição da Ordem'
+        verbose_name='Descrição da Ordem',
+        db_column='descricao'
     )
     data_solicitacao = models.DateField(
-        verbose_name='Data de Solicitação'
+        verbose_name='Data de Solicitação',
+        db_column='dataSolicitacao'
     )
     data_limite = models.DateField(
-        verbose_name='Data Limite'
+        verbose_name='Data Limite',
+        db_column='dataLimite'
     )
     valor = models.DecimalField(
         max_digits=14,
         decimal_places=2,
-        verbose_name='Valor da Ordem'
+        verbose_name='Valor da Ordem',
+        db_column='valor'
     )
     situacao = models.CharField(
         max_length=20,
         choices=SITUACAO_CHOICES,
         default='1',
-        verbose_name='Situação'
+        verbose_name='Situação',
+        db_column='situacao'
     )
     executante = models.ForeignKey(
         'accounts.User',
@@ -55,12 +62,13 @@ class Ordem(models.Model):
     )
     observacoes = models.TextField(
         'Observações',
-        blank=True
+        blank=True,
+        null=True
     )
     
     # Campos de auditoria básicos
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
     created_by = models.ForeignKey(
         'accounts.User',
         on_delete=models.PROTECT,
@@ -70,6 +78,7 @@ class Ordem(models.Model):
     )
     
     class Meta:
+        db_table = 'ordem'
         verbose_name = 'Ordem de Serviço'
         verbose_name_plural = 'Ordens de Serviço'
         ordering = ['-data_solicitacao']

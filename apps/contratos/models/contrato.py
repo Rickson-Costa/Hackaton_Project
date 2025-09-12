@@ -24,53 +24,65 @@ class Contrato(models.Model):
         max_length=10,
         primary_key=True,
         verbose_name='Número do Contrato',
-        help_text='Formato: NNNN/AAAA (ex: 0001/2025)'
+        help_text='Formato: NNNN/AAAA (ex: 0001/2025)',
+        db_column='numContrato'
     )
     cod_ordem = models.OneToOneField(
         'projetos.Ordem',
         on_delete=models.PROTECT,
         related_name='contrato',
-        verbose_name='Ordem de Serviço'
+        verbose_name='Ordem de Serviço',
+        db_column='codOrdem'
     )
     descricao = models.CharField(
         max_length=500,
-        verbose_name='Descrição do Contrato'
+        verbose_name='Descrição do Contrato',
+        db_column='objeto'
     )
     cpf_cnpj = models.CharField(
         max_length=18,
-        verbose_name='CPF/CNPJ do Contratado'
+        verbose_name='CPF/CNPJ do Contratado',
+        db_column='cpfCnpj'
     )
     contratado = models.CharField(
         max_length=150,
-        verbose_name='Nome do Contratado'
+        verbose_name='Nome do Contratado',
+        db_column='contratado'
     )
     tipo_pessoa = models.IntegerField(
         choices=TIPO_PESSOA_CHOICES,
-        verbose_name='Tipo de Pessoa'
+        verbose_name='Tipo de Pessoa',
+        db_column='tipoPessoa'
     )
     data_inicio = models.DateField(
-        verbose_name='Data de Início'
+        verbose_name='Data de Início',
+        db_column='dataInicio'
     )
     data_fim = models.DateField(
-        verbose_name='Data de Fim'
+        verbose_name='Data de Fim',
+        db_column='dataFim'
     )
     valor = models.DecimalField(
         max_digits=14,
         decimal_places=2,
-        verbose_name='Valor do Contrato'
+        verbose_name='Valor do Contrato',
+        db_column='valor'
     )
     parcelas = models.IntegerField(
         verbose_name='Quantidade de Parcelas',
-        default=1
+        default=1,
+        db_column='parcelas'
     )
     data_parcela_inicial = models.DateField(
-        verbose_name='Data de Vencimento da Primeira Parcela'
+        verbose_name='Data de Vencimento da Primeira Parcela',
+        db_column='dataParcelaInicial'
     )
     situacao = models.CharField(
         max_length=20,
         choices=SITUACAO_CHOICES,
         default='1',
-        verbose_name='Situação'
+        verbose_name='Situação',
+        db_column='situacao'
     )
     
     # Campos de controle simplificados
@@ -105,6 +117,7 @@ class Contrato(models.Model):
     )
     
     class Meta:
+        db_table = 'contrato'
         verbose_name = 'Contrato'
         verbose_name_plural = 'Contratos'
         ordering = ['-created_at']

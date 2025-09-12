@@ -16,28 +16,33 @@ class Projeto(models.Model):
         ('6', 'Concluído'),
     ]
     
-    cod_projeto = models.AutoField(
+    cod_projeto = models.IntegerField(
         primary_key=True,
-        verbose_name='Código do Projeto'
+        verbose_name='Código do Projeto',
+        db_column='codProjeto'
     )
     nome = models.CharField(
         max_length=200,
-        verbose_name='Nome do Projeto'
+        verbose_name='Nome do Projeto',
+        db_column='nome'
     )
     descricao = models.TextField(
         'Descrição',
         blank=True
     )
     data_inicio = models.DateField(
-        verbose_name='Data de Início'
+        verbose_name='Data de Início',
+        db_column='dataInicio'
     )
     data_encerramento = models.DateField(
-        verbose_name='Data de Encerramento'
+        verbose_name='Data de Encerramento',
+        db_column='dataEncerramento'
     )
     valor = models.DecimalField(
         max_digits=14,
         decimal_places=2,
-        verbose_name='Valor Orçado'
+        verbose_name='Valor Orçado',
+        db_column='valor'
     )
     valor_realizado = models.DecimalField(
         'Valor Realizado',
@@ -51,13 +56,16 @@ class Projeto(models.Model):
         max_length=20,
         choices=SITUACAO_CHOICES,
         default='1',
-        verbose_name='Situação'
+        verbose_name='Situação',
+        null=True,
+        db_column='situacao'
     )
     responsavel = models.ForeignKey(
         'accounts.User',
         on_delete=models.PROTECT,
         related_name='projetos_responsavel',
-        verbose_name='Responsável'
+        verbose_name='Responsável',
+        db_column='responsavel'
     )
     cliente_nome = models.CharField(
         'Nome do Cliente',
@@ -73,8 +81,8 @@ class Projeto(models.Model):
     )
     
     # Campos de auditoria básicos
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
     created_by = models.ForeignKey(
         'accounts.User',
         on_delete=models.PROTECT,
@@ -84,6 +92,7 @@ class Projeto(models.Model):
     )
     
     class Meta:
+        db_table = 'projetos'
         verbose_name = 'Projeto'
         verbose_name_plural = 'Projetos'
         ordering = ['-created_at']
