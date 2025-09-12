@@ -1,0 +1,32 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Editar Contrato{% else %}Novo Contrato{% endif %}{% endblock %}
+
+{% block page_title %}
+    {% if object %}
+        Editar Contrato {{ object.numContrato }}
+    {% else %}
+        Novo Contrato para a Ordem de Serviço #{{ ordem.codOrdem }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Dados do Contrato</h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="mt-3">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save me-1"></i> Salvar Contrato
+                </button>
+                <a href="{{ request.META.HTTP_REFERER|escape }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Contrato {{ contrato.numContrato }}{% endblock %}
+{% block page_title %}Detalhes do Contrato{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'contratos:contrato_list' %}" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i> Voltar</a>
+<a href="{% url 'contratos:contrato_update' contrato.pk %}" class="btn btn-primary"><i class="fas fa-edit me-1"></i> Editar</a>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Informações: {{ contrato.numContrato }}</h5></div>
+            <div class="card-body">
+                <p><strong>Descrição:</strong> {{ contrato.descricao }}</p>
+                <p><strong>Ordem de Serviço:</strong> <a href="{% url 'projetos:ordem_detail' contrato.codOrdem.pk %}">#{{ contrato.codOrdem.codOrdem }}</a></p>
+                <p><strong>Contratado:</strong> {{ contrato.contratado }} ({{ contrato.get_tipoPessoa_display }})</p>
+                <p><strong>CPF/CNPJ:</strong> {{ contrato.cpfcnpj }}</p>
+                <p><strong>Vigência:</strong> {{ contrato.data_inicio|date:"d/m/Y" }} a {{ contrato.data_fim|date:"d/m/Y" }}</p>
+                <p><strong>Situação:</strong> <span class="badge bg-success">{{ contrato.get_situacao_display }}</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Valores</h5></div>
+            <div class="card-body">
+                <p><strong>Valor Bruto:</strong> R$ {{ contrato.valor|floatformat:2 }}</p>
+                <p><strong>Valor Líquido:</strong> R$ {{ contrato.valor_liquido|floatformat:2 }}</p>
+                <p><strong>Valor Pago:</strong> R$ {{ contrato.valor_pago|floatformat:2 }}</p>
+                <p><strong>Valor Pendente:</strong> <strong class="text-danger">R$ {{ contrato.valor_pendente|floatformat:2 }}</strong></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header"><h5 class="mb-0">Plano de Pagamento ({{ contrato.parcelas }} Parcela(s))</h5></div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th># Parcela</th>
+                    <th>Vencimento</th>
+                    <th>Valor da Parcela</th>
+                    <th>Valor Pago</th>
+                    <th>Situação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in contrato.itens_contrato.all %}
+                <tr>
+                    <td>{{ item.numParcela }}</td>
+                    <td>{{ item.dataVencimento|date:"d/m/Y" }}</td>
+                    <td>R$ {{ item.valorParcela|floatformat:2 }}</td>
+                    <td>R$ {{ item.valorPago|default:"0.00"|floatformat:2 }}</td>
+                    <td><span class="badge bg-info">{{ item.get_situacao_display }}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-success btn-pagar"
+                                data-bs-toggle="modal"
+                                data-bs-target="#pagamentoModal"
+                                data-action-url="{% url 'contratos:parcela_pagar' contrato.pk item.codLancamento %}"
+                                data-parcela-num="{{ item.numParcela }}"
+                                data-contrato-num="{{ contrato.numContrato }}">
+                            <i class="fas fa-dollar-sign"></i> Registrar Pagamento
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center">Nenhuma parcela encontrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include 'contratos/partials/modal_pagamento.html' with form_pagamento=form_pagamento %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const pagamentoModal = document.getElementById('pagamentoModal');
+    pagamentoModal.addEventListener('show.bs.modal', function (event) {
+        // Botão que acionou o modal
+        const button = event.relatedTarget;
+        
+        // Extrai informações dos atributos data-*
+        const actionUrl = button.getAttribute('data-action-url');
+        const parcelaNum = button.getAttribute('data-parcela-num');
+        const contratoNum = button.getAttribute('data-contrato-num');
+        
+        // Atualiza o formulário do modal
+        const form = pagamentoModal.querySelector('#pagamentoForm');
+        form.action = actionUrl;
+        
+        // Atualiza o texto informativo do modal
+        pagamentoModal.querySelector('#modalParcelaNum').textContent = parcelaNum;
+        pagamentoModal.querySelector('#modalContratoNum').textContent = contratoNum;
+    });
+});
+</script>
+{% endblock %}

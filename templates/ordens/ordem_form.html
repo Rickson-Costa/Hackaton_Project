@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Nova Ordem de Serviço - FUNETEC{% endblock %}
+
+{% block page_title %}Adicionar Ordem à Requisição #{{ requisicao.codRequisicao }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Salvar Ordem</button>
+            <a href="{% url 'projetos:requisicao_detail' requisicao.pk %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

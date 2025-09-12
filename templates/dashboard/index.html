@@ -1,0 +1,99 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard - FUNETEC{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-success">
+            <h4><i class="fas fa-check-circle me-2"></i>Sistema FUNETEC Funcionando!</h4>
+            <p>Parabéns! O sistema está rodando corretamente. Agora você pode começar a usar as funcionalidades.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-project-diagram fa-3x mb-3"></i>
+                <h4>Projetos</h4>
+                <p>Gerencie seus projetos de forma eficiente</p>
+                <a href="{% url 'projetos:projeto_list' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-file-contract fa-3x mb-3"></i>
+                <h4>Contratos</h4>
+                <p>Controle total sobre seus contratos</p>
+                <a href="{% url 'contratos:contrato_list' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-circle fa-3x mb-3"></i>
+                <h4>Perfil</h4>
+                <p>Gerencie seu perfil e configurações</p>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-light">
+                    <i class="fas fa-arrow-right me-1"></i>Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Sobre o Sistema</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Funcionalidades Principais:</h6>
+                        <ul>
+                            <li>Gestão completa de projetos</li>
+                            <li>Controle de requisições e ordens</li>
+                            <li>Gerenciamento de contratos</li>
+                            <li>Sistema de usuários com permissões</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Tecnologias Utilizadas:</h6>
+                        <ul>
+                            <li>Django 4.2</li>
+                            <li>Bootstrap 5</li>
+                            <li>Chart.js (para gráficos)</li>
+                            <li>PostgreSQL/SQLite</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-light">
+            <div class="card-body text-center">
+                <h6>Sistema desenvolvido para FUNETEC-PB</h6>
+                <p class="mb-0 text-muted">Fundação de Apoio à Pesquisa e ao Desenvolvimento Tecnológico da Paraíba</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

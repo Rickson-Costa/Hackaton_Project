@@ -1,0 +1,61 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Detalhes do Projeto - FUNETEC{% endblock %}
+
+{% block page_title %}Detalhes do Projeto{% endblock %}
+
+{% block page_actions %}
+    <a href="{% url 'projetos:projeto_list' %}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Voltar para a Lista
+    </a>
+    {% if perms.projetos.change_projeto %}
+        <a href="{% url 'projetos:projeto_update' projeto.pk %}" class="btn btn-primary">
+            <i class="fas fa-edit me-1"></i> Editar Projeto
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4 class="mb-0">{{ projeto.nome }}</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Código:</strong> #{{ projeto.codProjeto }}</p>
+                <p><strong>Responsável:</strong> {{ projeto.responsavel.get_full_name|default:projeto.responsavel.username }}</p>
+                <p><strong>Situação:</strong> <span class="badge bg-primary">{{ projeto.get_situacao_display }}</span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Data de Início:</strong> {{ projeto.data_inicio|date:"d/m/Y" }}</p>
+                <p><strong>Data de Encerramento:</strong> {{ projeto.data_encerramento|date:"d/m/Y" }}</p>
+                <p><strong>Valor Orçado:</strong> R$ {{ projeto.valor|floatformat:2 }}</p>
+            </div>
+        </div>
+        
+        <hr>
+
+        <h5 class="mt-4">Requisições do Projeto</h5>
+        <a href="#" class="btn btn-sm btn-outline-primary mb-3">
+            <i class="fas fa-plus me-1"></i> Adicionar Requisição
+        </a>
+        
+        {% with requisicoes=projeto.requisicoes.all %}
+            {% if requisicoes %}
+                <ul class="list-group">
+                    {% for req in requisicoes %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ req.descricao|truncatechars:80 }}
+                            <span class="badge bg-info rounded-pill">Ver Detalhes</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">Nenhuma requisição cadastrada para este projeto.</p>
+            {% endif %}
+        {% endwith %}
+
+    </div>
+</div>
+{% endblock %}

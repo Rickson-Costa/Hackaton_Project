@@ -1,0 +1,42 @@
+<div class="modal fade" id="pagamentoModal" tabindex="-1" aria-labelledby="pagamentoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pagamentoModalLabel">Registrar Pagamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="pagamentoForm" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Você está registrando um pagamento para a parcela <strong id="modalParcelaNum"></strong> do contrato <strong id="modalContratoNum"></strong>.</p>
+                    
+                    <div class="mb-3">
+                        <label for="id_valor_pago" class="form-label">Valor a Pagar</label>
+                        <input type="number" name="valor_pago" class="form-control" required id="id_valor_pago" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_data_pagamento" class="form-label">Data do Pagamento</label>
+                        <input type="date" name="data_pagamento" class="form-control" required id="id_data_pagamento">
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_metodo_pagamento" class="form-label">Método de Pagamento</label>
+                        <select name="metodo_pagamento" class="form-select" id="id_metodo_pagamento">
+                            {% for value, text in form_pagamento.metodo_pagamento.field.choices %}
+                                <option value="{{ value }}">{{ text }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                     <div class="mb-3">
+                        <label for="id_observacoes" class="form-label">Observações</label>
+                        <textarea name="observacoes" class="form-control" rows="3" id="id_observacoes"></textarea>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

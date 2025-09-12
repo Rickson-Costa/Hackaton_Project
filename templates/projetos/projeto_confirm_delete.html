@@ -1,0 +1,30 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Confirmar Exclusão - FUNETEC{% endblock %}
+
+{% block page_title %}Excluir Projeto{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <p class="fs-5">
+                Você tem certeza que deseja excluir o projeto <strong>"{{ object.nome }}"</strong>?
+            </p>
+            <p class="text-danger">
+                Esta ação não pode ser desfeita. Todos os dados relacionados (requisições, ordens, etc.) também poderão ser afetados.
+            </p>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash me-1"></i> Sim, Excluir
+                </button>
+                <a href="{% url 'projetos:projeto_list' %}" class="btn btn-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

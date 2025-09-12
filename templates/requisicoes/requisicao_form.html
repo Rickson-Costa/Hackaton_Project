@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Nova Requisição - FUNETEC{% endblock %}
+
+{% block page_title %}Adicionar Requisição ao Projeto: {{ projeto.nome }}{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Salvar Requisição</button>
+            <a href="{% url 'projetos:projeto_detail' projeto.pk %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

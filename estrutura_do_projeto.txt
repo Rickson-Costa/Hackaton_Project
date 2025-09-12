@@ -1,0 +1,211 @@
+funetec_system/
+├── manage.py
+├── requirements.txt
+├── .gitignore
+├── README.md
+├── logs/
+│   ├── __init__.py
+│   ├── access.log
+│   └── error.log
+├── media/
+│   ├── uploads/
+│   └── reports/
+├── static/
+│   ├── css/
+│   │   ├── base.css
+│   │   ├── dashboard.css
+│   │   └── custom.css
+│   ├── js/
+│   │   ├── base.js
+│   │   ├── dashboard.js
+│   │   ├── charts.js
+│   │   └── components/
+│   └── img/
+│       └── logo.png
+├── templates/
+│   ├── base/
+│   │   ├── base.html
+│   │   ├── navbar.html
+│   │   ├── sidebar.html
+│   │   └── footer.html
+│   ├── accounts/
+│   │   ├── login.html
+│   │   ├── register.html
+│   │   └── profile.html
+│   ├── dashboard/
+│   │   ├── index.html
+│   │   ├── widgets/
+│   │   └── charts/
+│   ├── projetos/
+│   ├── contratos/
+│   └── error/
+│       ├── 404.html
+│       └── 500.html
+├── funetec_system/
+│   ├── __init__.py
+│   ├── settings/
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── development.py
+│   │   └── production.py
+│   ├── urls.py
+│   └── wsgi.py
+├── apps/
+│   ├── __init__.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── audit.py
+│   │   │   └── mixins.py
+│   │   ├── managers/
+│   │   │   ├── __init__.py
+│   │   │   └── base.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   └── base_service.py
+│   │   ├── utils/
+│   │   │   ├── __init__.py
+│   │   │   ├── validators.py
+│   │   │   ├── helpers.py
+│   │   │   └── constants.py
+│   │   ├── exceptions/
+│   │   │   ├── __init__.py
+│   │   │   └── custom.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   └── tests.py
+│   ├── accounts/
+│   │   ├── __init__.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py
+│   │   │   └── profile.py
+│   │   ├── managers/
+│   │   │   ├── __init__.py
+│   │   │   └── user_manager.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py
+│   │   │   └── permission_service.py
+│   │   ├── views/
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_views.py
+│   │   │   └── profile_views.py
+│   │   ├── forms/
+│   │   │   ├── __init__.py
+│   │   │   └── auth_forms.py
+│   │   ├── decorators/
+│   │   │   ├── __init__.py
+│   │   │   └── permissions.py
+│   │   ├── urls.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   └── tests/
+│   ├── projetos/
+│   │   ├── __init__.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── projeto.py
+│   │   │   ├── requisicao.py
+│   │   │   ├── ordem.py
+│   │   │   └── item_ordem.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── projeto_service.py
+│   │   │   ├── requisicao_service.py
+│   │   │   └── ordem_service.py
+│   │   ├── views/
+│   │   │   ├── __init__.py
+│   │   │   ├── projeto_views.py
+│   │   │   ├── requisicao_views.py
+│   │   │   └── ordem_views.py
+│   │   ├── forms/
+│   │   │   ├── __init__.py
+│   │   │   └── projeto_forms.py
+│   │   ├── serializers/
+│   │   │   ├── __init__.py
+│   │   │   └── projeto_serializers.py
+│   │   ├── urls.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   └── tests/
+│   ├── contratos/
+│   │   ├── __init__.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   ├── contrato.py
+│   │   │   └── item_contrato.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── contrato_service.py
+│   │   │   ├── pagamento_service.py
+│   │   │   └── fiscal_service.py
+│   │   ├── views/
+│   │   │   ├── __init__.py
+│   │   │   └── contrato_views.py
+│   │   ├── forms/
+│   │   │   ├── __init__.py
+│   │   │   └── contrato_forms.py
+│   │   ├── calculators/
+│   │   │   ├── __init__.py
+│   │   │   ├── pf_calculator.py
+│   │   │   └── pj_calculator.py
+│   │   ├── urls.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   └── tests/
+│   ├── dashboard/
+│   │   ├── __init__.py
+│   │   ├── views/
+│   │   │   ├── __init__.py
+│   │   │   ├── main_dashboard.py
+│   │   │   └── analytics_views.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── metrics_service.py
+│   │   │   └── chart_service.py
+│   │   ├── widgets/
+│   │   │   ├── __init__.py
+│   │   │   ├── base_widget.py
+│   │   │   ├── project_widget.py
+│   │   │   └── financial_widget.py
+│   │   ├── urls.py
+│   │   ├── apps.py
+│   │   └── tests/
+│   ├── pagamentos/
+│   │   ├── __init__.py
+│   │   ├── services/
+│   │   │   ├── __init__.py
+│   │   │   ├── mercadopago_service.py
+│   │   │   └── payment_service.py
+│   │   ├── models/
+│   │   │   ├── __init__.py
+│   │   │   └── payment.py
+│   │   ├── views/
+│   │   │   ├── __init__.py
+│   │   │   └── payment_views.py
+│   │   ├── webhooks/
+│   │   │   ├── __init__.py
+│   │   │   └── mercadopago_webhook.py
+│   │   ├── urls.py
+│   │   ├── apps.py
+│   │   └── tests/
+│   └── relatorios/
+│       ├── __init__.py
+│       ├── services/
+│       │   ├── __init__.py
+│       │   ├── pdf_service.py
+│       │   └── report_service.py
+│       ├── templates/
+│       │   ├── __init__.py
+│       │   ├── base_report.py
+│       │   ├── projeto_report.py
+│       │   └── contrato_report.py
+│       ├── views/
+│       │   ├── __init__.py
+│       │   └── report_views.py
+│       ├── urls.py
+│       ├── apps.py
+│       └── tests/

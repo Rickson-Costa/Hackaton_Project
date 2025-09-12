@@ -1,0 +1,35 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Central de Relatórios - FUNETEC{% endblock %}
+{% block page_title %}Central de Relatórios{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-project-diagram me-2"></i> Relatório de Projetos</h5>
+                <p class="card-text">Gere uma lista completa de todos os projetos cadastrados no sistema, incluindo seus valores e situação atual.</p>
+                
+                <a href="{% url 'relatorios:relatorio_projetos_generate' %}?format=pdf" class="btn btn-danger">
+                    <i class="fas fa-file-pdf me-1"></i> Gerar PDF
+                </a>
+                <a href="{% url 'relatorios:relatorio_projetos_generate' %}?format=excel" class="btn btn-success">
+                    <i class="fas fa-file-excel me-1"></i> Gerar Excel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-muted">
+                <h5 class="card-title"><i class="fas fa-file-invoice-dollar me-2"></i> Relatório Financeiro</h5>
+                <p class="card-text">Em breve: um relatório detalhado sobre o fluxo de caixa, inadimplência e valores recebidos.</p>
+                <button class="btn btn-secondary" disabled>Gerar PDF</button>
+                <button class="btn btn-secondary" disabled>Gerar Excel</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

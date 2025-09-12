@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FUNETEC</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 3rem;
+            max-width: 400px;
+            width: 100%;
+            margin: 2rem;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .login-header .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        
+        .login-header .logo i {
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .login-header h2 {
+            color: #333;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+        }
+        
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .footer-text {
+            text-align: center;
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .loading .btn-login {
+            position: relative;
+        }
+        
+        .loading .btn-login::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 576px) {
+            .login-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fas fa-building"></i>
+            </div>
+            <h2>FUNETEC</h2>
+            <p>Sistema de Gestão de Projetos e Contratos</p>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{% if message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'success' %}check-circle{% else %}info-circle{% endif %} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- Form Errors -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    <i class="fas fa-exclamation-triangle me-2"></i>{{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        <form method="post" id="loginForm">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label for="{{ form.username.id_for_label }}" class="form-label">
+                    <i class="fas fa-user me-2"></i>Email ou Usuário
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="text-danger small mt-1">
+                        {% for error in form.username.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.password.id_for_label }}" class="form-label">
+                    <i class="fas fa-lock me-2"></i>Senha
+                </label>
+                <div class="input-group">
+                    {{ form.password }}
+                    <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                        <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                    </button>
+                </div>
+                {% if form.password.errors %}
+                    <div class="text-danger small mt-1">
+                        {% for error in form.password.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
+                    <label class="form-check-label" for="remember_me">
+                        Lembrar-me
+                    </label>
+                </div>
+                <a href="#" class="text-decoration-none small" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                    Esqueci minha senha
+                </a>
+            </div>
+            
+            <button type="submit" class="btn btn-login text-white w-100 mb-3">
+                <span class="btn-text">Entrar</span>
+            </button>
+        </form>
+        
+        <div class="text-center">
+            <p class="mb-0 small">
+                Precisa de acesso? 
+                <a href="mailto:contato@funetec.org.br" class="text-decoration-none">
+                    Entre em contato
+                </a>
+            </p>
+        </div>
+        
+        <div class="footer-text">
+            <p class="mb-0">
+                © {{ current_year|default:2025 }} FUNETEC-PB. Todos os direitos reservados.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Modal Esqueci Senha -->
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Recuperar Senha</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Para recuperar sua senha, entre em contato com o administrador do sistema:</p>
+                    <ul>
+                        <li>Email: <a href="mailto:ti@funetec.org.br">ti@funetec.org.br</a></li>
+                        <li>Telefone: (83) 3000-0000</li>
+                    </ul>
+                    <p class="small text-muted">
+                        Informe seu nome completo e email cadastrado no sistema.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle senha
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+            const toggleIcon = document.getElementById('togglePasswordIcon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+        
+        // Loading state no form
+        document.getElementById('loginForm').addEventListener('submit', function() {
+            const form = this;
+            const button = form.querySelector('.btn-login');
+            const buttonText = button.querySelector('.btn-text');
+            
+            // Adicionar estado de loading
+            form.classList.add('loading');
+            buttonText.textContent = 'Entrando...';
+            button.disabled = true;
+            
+            // Remover loading se houver erro (depois de 5 segundos)
+            setTimeout(function() {
+                if (form.classList.contains('loading')) {
+                    form.classList.remove('loading');
+                    buttonText.textContent = 'Entrar';
+                    button.disabled = false;
+                }
+            }, 5000);
+        });
+        
+        // Auto-focus no primeiro campo
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('{{ form.username.id_for_label }}').focus();
+        });
+        
+        // Keypress Enter
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.querySelector('.modal.show')) {
+                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+</html>
