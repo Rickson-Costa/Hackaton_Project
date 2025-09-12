@@ -15,11 +15,11 @@ class LancamentoCustoCreateView(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('projetos:projeto-detail', kwargs={'pk': self.kwargs['projeto_pk']})
+        return reverse_lazy('projetos:projeto_detail', kwargs={'pk': self.kwargs['projeto_pk']})
 
 class LancamentoCustoDeleteView(DeleteView):
     model = LancamentoCusto
     template_name = 'projetos/lancamento_confirm_delete.html'
     
     def get_success_url(self):
-        return reverse_lazy('projetos:projeto-detail', kwargs={'pk': self.object.projeto.pk})
+        return reverse_lazy('projetos:projeto_detail', kwargs={'pk': self.object.projeto.pk})

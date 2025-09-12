@@ -15,7 +15,7 @@ class MarcoProjetoCreateView(CreateView):
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse_lazy('projetos:projeto-detail', kwargs={'pk': self.kwargs['projeto_pk']})
+        return reverse_lazy('projetos:projeto_detail', kwargs={'pk': self.kwargs['projeto_pk']})
 
 class MarcoProjetoUpdateStatusView(UpdateView):
     model = MarcoProjeto
