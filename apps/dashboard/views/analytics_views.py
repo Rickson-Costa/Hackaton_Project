@@ -487,6 +487,24 @@ class ContratosAnalyticsService(BaseService):
 
 class FinanceiroAnalyticsService(BaseService):
     """Service para analytics financeiros"""
+
+    def __init__(self, user=None):
+        super().__init__(user)
+        self.hoje = timezone.now().date()
+
+    def _meses_zero(self):
+        return {m: 0 for m in range(1, 12 + 1)}
+
+    def get_receitas_por_mes(self, ano=None):
+        """Retorna dict {1..12: valor}. Inicialmente zerado."""
+        ano = ano or self.hoje.year
+        data = self._meses_zero()
+        # TODO: Implementar a lógica real de busca de receitas
+        return data
+
+    def get_impostos_retidos(self):
+        """Placeholder para o método que falta."""
+        return {}
     
     def get_resumo_financeiro(self):
         """Resumo financeiro geral"""

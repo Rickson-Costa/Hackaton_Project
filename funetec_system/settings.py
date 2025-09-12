@@ -33,6 +33,7 @@ THIRD_PARTY_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_extensions',
+    'rest_framework',
 ]
 
 
@@ -150,18 +151,52 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='sistema@funetec.org.br')
 
 
-# funetec_system/settings.py
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
+        'file_access': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'access.log',
+            'formatter': 'verbose',
+        },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'error.log',
+            'formatter': 'verbose',
+        },
         'console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
+            'formatter': 'simple',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file_access'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'apps': {
+            'handlers': ['file_error', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
@@ -222,8 +257,11 @@ MERCADOPAGO_PUBLIC_KEY = config('MERCADOPAGO_PUBLIC_KEY', default='')
 # Cache Configuration
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-dev-cache',
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
     }
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # usa tabela django_session
