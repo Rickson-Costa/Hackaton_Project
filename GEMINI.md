@@ -247,7 +247,7 @@ python manage.py runserver
 
 ### Fase 1: Correções Básicas
 1. Corrigir imports faltantes - CONCLUÍDO
-2. Criar templates necessários - PENDENTE
+2. Criar templates necessários - CONCLUÍDO
 3. Configurar banco de dados - PENDENTE
 4. Testar funcionalidades básicas - PENDENTE
 

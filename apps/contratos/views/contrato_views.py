@@ -63,6 +63,17 @@ class PrestadorListView(LoginRequiredMixin, ListView):
     context_object_name = 'prestadores'
     paginate_by = 10
 
+class PrestadorDetailView(LoginRequiredMixin, DetailView):
+    model = Prestador
+    template_name = 'contratos/prestador_detail.html'
+    context_object_name = 'prestador'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        prestador = self.get_object()
+        context['contratos'] = Contrato.objects.filter(cpf_cnpj=prestador.cpf_cnpj)
+        return context
+
 class ParcelaListView(LoginRequiredMixin, ListView):
     model = ItemContrato
     template_name = 'contratos/parcela_list.html'

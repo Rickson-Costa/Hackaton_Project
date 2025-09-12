@@ -1,6 +1,180 @@
 {% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Gestão de Usuários - FUNETEC{% endblock %}
+{% block page_title %}Gestão de Usuários{% endblock %}
 
 {% block content %}
-  <h1>User List</h1>
-  <p>This is a placeholder for the user list page.</p>
+
+{# Seção de Estatísticas #}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-users me-2"></i>Total de Usuários</h5>
+                <p class="card-text fs-4">{{ stats.total_users }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-user-check me-2"></i>Usuários Ativos</h5>
+                <p class="card-text fs-4">{{ stats.active_users }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-user-shield me-2"></i>Administradores</h5>
+                <p class="card-text fs-4">{{ stats.admin_users }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-user-tie me-2"></i>Clientes</h5>
+                <p class="card-text fs-4">{{ stats.client_users }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list me-2"></i>Lista de Usuários</span>
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Adicionar Usuário
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {# Formulário de Filtros #}
+        <form method="get" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar por nome, email..." value="{{ current_filters.search }}">
+                </div>
+                <div class="col-md-2">
+                    <select name="role" class="form-select">
+                        <option value="">Todas as Funções</option>
+                        {% for value, display in role_choices %}
+                            <option value="{{ value }}" {% if current_filters.role == value %}selected{% endif %}>{{ display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                     <select name="status" class="form-select">
+                        <option value="">Todos os Status</option>
+                        <option value="active" {% if current_filters.status == 'active' %}selected{% endif %}>Ativo</option>
+                        <option value="inactive" {% if current_filters.status == 'inactive' %}selected{% endif %}>Inativo</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{% url 'accounts:user_list' %}" class="btn btn-secondary w-100">Limpar</a>
+                </div>
+            </div>
+        </form>
+
+        {# Tabela de Usuários #}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Função</th>
+                        <th>Status</th>
+                        <th>Membro Desde</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_obj in users %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ user_obj.profile.get_avatar_url }}" alt="Avatar" class="rounded-circle me-3" width="40" height="40">
+                                <div>
+                                    <strong>{{ user_obj.get_full_name|default:user_obj.username }}</strong>
+                                    <div class="text-muted">{{ user_obj.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ user_obj.get_role_display }}</td>
+                        <td>
+                            {% if user_obj.is_active %}
+                                <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user_obj.date_joined|date:"d/m/Y" }}</td>
+                        <td class="text-end">
+                            <a href="#" class="btn btn-sm btn-outline-primary me-1" title="Detalhes">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="#" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Nenhum usuário encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Paginação #}
+        {% if is_paginated %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in current_filters.items %}{% if value %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}
