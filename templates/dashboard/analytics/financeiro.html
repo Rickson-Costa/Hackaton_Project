@@ -1,0 +1,27 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Analytics Financeiro - FUNETEC{% endblock %}
+{% block page_title %}Analytics Financeiro{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Resumo Financeiro</h5>
+    </div>
+    <div class="card-body">
+        <p>Ano: {{ resumo.ano }}</p>
+        <p>Total de Receitas: R$ {{ resumo.total_receitas|floatformat:2 }}</p>
+        <p>Total de Despesas: R$ {{ resumo.total_despesas|floatformat:2 }}</p>
+        <p><strong>Saldo: R$ {{ resumo.saldo|floatformat:2 }}</strong></p>
+    </div>
+</div>
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">Receitas e Despesas por Mês</h5>
+    </div>
+    <div class="card-body">
+        <p>Funcionalidade de gráfico em desenvolvimento.</p>
+    </div>
+</div>
+{% endblock %}

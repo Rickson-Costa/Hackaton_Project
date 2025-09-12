@@ -1,6 +1,42 @@
 {% extends 'base/base.html' %}
 
+{% block title %}Prestadores de Serviço - FUNETEC{% endblock %}
+{% block page_title %}Prestadores de Serviço{% endblock %}
+
 {% block content %}
-  <h1>Provider List</h1>
-  <p>This is a placeholder for the provider list page.</p>
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">Lista de Prestadores</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome / Razão Social</th>
+                        <th>CPF / CNPJ</th>
+                        <th>Tipo</th>
+                        <th>Email</th>
+                        <th>Telefone</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prestador in prestadores %}
+                    <tr>
+                        <td><strong>{{ prestador.nome }}</strong></td>
+                        <td>{{ prestador.cpf_cnpj }}</td>
+                        <td>{{ prestador.get_tipo_pessoa_display }}</td>
+                        <td>{{ prestador.email|default:"-" }}</td>
+                        <td>{{ prestador.telefone|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">Nenhum prestador encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

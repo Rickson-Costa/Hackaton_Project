@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import payment_views
+from .views import payments_views as payment_views
 from .webhooks import mercadopago_webhook
 
 app_name = 'pagamentos'

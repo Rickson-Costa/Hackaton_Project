@@ -15,8 +15,8 @@ urlpatterns = [
     path('contratos/', include('apps.contratos.urls')),
     path('api/', include('apps.api.urls')),
     # Comentar temporariamente os problemáticos:
-    # path('pagamentos/', include('apps.pagamentos.urls')),
-    # path('relatorios/', include('apps.relatorios.urls')),
+    path('pagamentos/', include('apps.pagamentos.urls')),
+    path('relatorios/', include('apps.relatorios.urls')),
 ]
 
 if settings.DEBUG:

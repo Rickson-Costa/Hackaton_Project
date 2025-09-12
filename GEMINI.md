@@ -247,21 +247,21 @@ python manage.py runserver
 
 ### Fase 1: Correções Básicas
 1. Corrigir imports faltantes - CONCLUÍDO
-2. Criar templates necessários - CONCLUÍDO
-3. Configurar banco de dados - CONCLUÍDO (O superusuário precisa ser criado manualmente)
-4. Testar funcionalidades básicas - CONCLUÍDO (Testado com web_fetch, autenticação funcionando)
+2. Criar templates necessários - PENDENTE
+3. Configurar banco de dados - PENDENTE
+4. Testar funcionalidades básicas - PENDENTE
 
 ### Fase 2: Melhorias
-1. Implementar testes automatizados - CONCLUÍDO
-2. Melhorar sistema de cache - CONCLUÍDO
-3. Adicionar logging robusto - CONCLUÍDO
-4. Implementar API REST - CONCLUÍDO
+1. Implementar testes automatizados - EM ANDAMENTO
+2. Melhorar sistema de cache - EM ANDAMENTO
+3. Adicionar logging robusto - PENDENTE
+4. Implementar API REST - EM ANDAMENTO
 
 ### Fase 3: Funcionalidades Avançadas
-1. Integração completa com Mercado Pago
-2. Sistema de notificações em tempo real
-3. Dashboard avançado com mais métricas
-4. Relatórios personalizáveis
+1. Integração completa com Mercado Pago - PENDENTE
+2. Sistema de notificações em tempo real - PENDENTE
+3. Dashboard avançado com mais métricas - PENDENTE
+4. Relatórios personalizáveis - PENDENTE
 
 ## 💡 Recomendações Técnicas
 

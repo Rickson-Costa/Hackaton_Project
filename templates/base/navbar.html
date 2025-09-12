@@ -154,7 +154,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'contratos:parcela_list' 'all' %}">
+                    <a class="nav-link" href="{% url 'contratos:parcela_list' %}">
                         <i class="fas fa-money-bill-wave me-2"></i>
                         Parcelas
                     </a>
@@ -190,18 +190,12 @@
             </h6>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link {% if 'relatorio' in request.resolver_match.url_name %}active{% endif %}" 
-                       href="{% url 'relatorios:relatorio_list' %}">
-                        <i class="fas fa-file-alt me-2"></i>
-                        Relatórios
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'relatorios:relatorio_custom' %}">
-                        <i class="fas fa-chart-bar me-2"></i>
-                        Relatório Customizado
-                    </a>
-                </li>
+                    <a class="nav-link {% if 'relatorio' in request.resolver_match.url_name %}active{% endif %}"
+                    href="{% url 'relatorios:relatorio_list' %}">
+                    <i class="fas fa-file-alt me-2"></i>
+                    Relatórios
+                </a>
+            </li>
             </ul>
         {% endif %}
         
