@@ -37,7 +37,12 @@
 </div>
 
 <div class="card shadow-sm mt-4">
-    <div class="card-header"><h5 class="mb-0">Plano de Pagamento ({{ contrato.parcelas }} Parcela(s))</h5></div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Plano de Pagamento ({{ contrato.parcelas }} Parcela(s))</h5>
+        <a href="{% url 'contratos:itemcontrato-create' contrato.pk %}" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-1"></i> Adicionar Parcela
+        </a>
+    </div>
     <div class="card-body">
         <table class="table table-hover">
             <thead>
@@ -62,9 +67,9 @@
                         <button class="btn btn-sm btn-outline-success btn-pagar"
                                 data-bs-toggle="modal"
                                 data-bs-target="#pagamentoModal"
-                                data-action-url="{% url 'contratos:parcela_pagar' contrato.pk item.codLancamento %}"
-                                data-parcela-num="{{ item.numParcela }}"
-                                data-contrato-num="{{ contrato.numContrato }}">
+                                data-parcela-pk="{{ item.pk }}"
+                                data-parcela-num="{{ item.num_parcela }}"
+                                data-valor-pendente="{{ item.get_valor_pendente }}">
                             <i class="fas fa-dollar-sign"></i> Registrar Pagamento
                         </button>
                     </td>
@@ -101,6 +106,38 @@ document.addEventListener('DOMContentLoaded', function () {
         // Atualiza o texto informativo do modal
         pagamentoModal.querySelector('#modalParcelaNum').textContent = parcelaNum;
         pagamentoModal.querySelector('#modalContratoNum').textContent = contratoNum;
+    });
+});
+</script>
+{% endblock %}v>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const pagamentoModal = document.getElementById('pagamentoModal');
+    pagamentoModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const parcelaPk = button.getAttribute('data-parcela-pk');
+        const parcelaNum = button.getAttribute('data-parcela-num');
+        const valorPendente = button.getAttribute('data-valor-pendente');
+
+        const form = pagamentoModal.querySelector('#pagamentoForm');
+        form.action = `/contratos/parcelas/${parcelaPk}/registrar-pagamento/`;
+
+        pagamentoModal.querySelector('#modalParcelaNum').textContent = parcelaNum;
+        pagamentoModal.querySelector('#modalValorPendente').textContent = `R$ ${valorPendente}`;
+        pagamentoModal.querySelector('#valor_pago').value = valorPendente;
     });
 });
 </script>

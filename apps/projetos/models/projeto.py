@@ -45,6 +45,8 @@ class Projeto(models.Model):
         decimal_places=2,
         default=0
     )
+    custo_previsto = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    custo_realizado = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, editable=False)
     situacao = models.CharField(
         max_length=20,
         choices=SITUACAO_CHOICES,

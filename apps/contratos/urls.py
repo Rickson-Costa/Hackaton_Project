@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import contrato_views
+from .views import contrato_views, pagamento_views
 
 app_name = 'contratos'
 
@@ -14,7 +14,10 @@ urlpatterns = [
     path('prestadores/', contrato_views.PrestadorListView.as_view(), name='prestador_list'),
 
     # URLs de Parcela (Funcionais)
-    path('parcelas/all/', contrato_views.ParcelaListView.as_view(), name='parcela_list'),
+    path('parcelas/all/', pagamento_views.ParcelaListView.as_view(), name='parcela_list'),
+    path('<str:contrato_pk>/parcelas/adicionar/', pagamento_views.ItemContratoCreateView.as_view(), name='itemcontrato-create'),
+    path('parcelas/<int:parcela_pk>/registrar-pagamento/', pagamento_views.RegistrarPagamentoView.as_view(), name='registrar-pagamento'),
+
 
     # --- URLs de funcionalidades futuras (Comentadas para evitar erros) ---
     # path('<str:pk>/ativar/', contrato_views.ContratoAtivarView.as_view(), name='contrato_ativar'),

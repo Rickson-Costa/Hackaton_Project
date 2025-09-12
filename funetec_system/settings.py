@@ -45,6 +45,7 @@ LOCAL_APPS = [
     'apps.dashboard.apps.DashboardConfig',
     'apps.pagamentos.apps.PagamentosConfig',
     'apps.relatorios.apps.RelatoriosConfig',
+    'apps.clientes',
 ]
 
 

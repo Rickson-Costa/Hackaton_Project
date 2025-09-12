@@ -6,7 +6,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from ..models.contrato import Contrato, Prestador
 from ..forms.contrato_forms import ContratoForm
 from apps.projetos.models.ordem import Ordem
-from ..models.item_contrato import ItemContrato
+
 
 class ContratoListView(LoginRequiredMixin, ListView):
     model = Contrato
@@ -73,14 +73,3 @@ class PrestadorDetailView(LoginRequiredMixin, DetailView):
         prestador = self.get_object()
         context['contratos'] = Contrato.objects.filter(cpf_cnpj=prestador.cpf_cnpj)
         return context
-
-class ParcelaListView(LoginRequiredMixin, ListView):
-    model = ItemContrato
-    template_name = 'contratos/parcela_list.html'
-    context_object_name = 'parcelas'
-    paginate_by = 15
-
-    def get_queryset(self):
-        # Apenas um exemplo para listar todas as parcelas.
-        # Pode ser filtrado por status, data, etc. no futuro.
-        return ItemContrato.objects.select_related('num_contrato').all().order_by('data_vencimento')

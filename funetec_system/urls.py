@@ -13,6 +13,7 @@ urlpatterns = [
     path('dashboard/', include(('apps.dashboard.urls', 'dashboard'), namespace='dashboard')),
     path('projetos/', include('apps.projetos.urls')),
     path('contratos/', include('apps.contratos.urls')),
+    path('clientes/', include(('apps.clientes.urls', 'clientes'), namespace='clientes')),
     path('api/', include('apps.api.urls')),
     # Comentar temporariamente os problemáticos:
     path('pagamentos/', include('apps.pagamentos.urls')),

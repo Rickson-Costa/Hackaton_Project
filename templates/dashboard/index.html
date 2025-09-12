@@ -6,79 +6,44 @@
 {% block content %}
 <div class="row mb-4">
     <div class="col-12">
-        <div class="alert alert-success">
-            <h4><i class="fas fa-check-circle me-2"></i>Sistema FUNETEC Funcionando!</h4>
-            <p>Parabéns! O sistema está rodando corretamente. Agora você pode começar a usar as funcionalidades.</p>
+        <div class="alert alert-info">
+            <p>Bem-vindo ao painel de controle do Sistema FUNETEC.</p>
         </div>
     </div>
 </div>
 
+<!-- Cards de Métricas -->
 <div class="row">
-    <div class="col-md-4 mb-4">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-project-diagram fa-3x mb-3"></i>
-                <h4>Projetos</h4>
-                <p>Gerencie seus projetos de forma eficiente</p>
-                <a href="{% url 'projetos:projeto_list' %}" class="btn btn-light">
-                    <i class="fas fa-arrow-right me-1"></i>Acessar
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4 mb-4">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-file-contract fa-3x mb-3"></i>
-                <h4>Contratos</h4>
-                <p>Controle total sobre seus contratos</p>
-                <a href="{% url 'contratos:contrato_list' %}" class="btn btn-light">
-                    <i class="fas fa-arrow-right me-1"></i>Acessar
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4 mb-4">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body text-center">
-                <i class="fas fa-user-circle fa-3x mb-3"></i>
-                <h4>Perfil</h4>
-                <p>Gerencie seu perfil e configurações</p>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-light">
-                    <i class="fas fa-arrow-right me-1"></i>Acessar
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-info-circle me-2"></i>Sobre o Sistema</h5>
-            </div>
+    <!-- Custo Previsto -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Funcionalidades Principais:</h6>
-                        <ul>
-                            <li>Gestão completa de projetos</li>
-                            <li>Controle de requisições e ordens</li>
-                            <li>Gerenciamento de contratos</li>
-                            <li>Sistema de usuários com permissões</li>
-                        </ul>
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Custo Previsto (Total)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">R$ {{ metricas_projetos.custo_previsto|floatformat:2 }}</div>
                     </div>
-                    <div class="col-md-6">
-                        <h6>Tecnologias Utilizadas:</h6>
-                        <ul>
-                            <li>Django 4.2</li>
-                            <li>Bootstrap 5</li>
-                            <li>Chart.js (para gráficos)</li>
-                            <li>PostgreSQL/SQLite</li>
-                        </ul>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custo Realizado -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Custo Realizado (Total)</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">R$ {{ metricas_projetos.custo_realizado|floatformat:2 }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
@@ -86,14 +51,48 @@
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card bg-light">
-            <div class="card-body text-center">
-                <h6>Sistema desenvolvido para FUNETEC-PB</h6>
-                <p class="mb-0 text-muted">Fundação de Apoio à Pesquisa e ao Desenvolvimento Tecnológico da Paraíba</p>
+<!-- Gráficos -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Custos: Previsto vs. Realizado</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="custosChart"></canvas>
             </div>
         </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Gráfico de Custos
+    var ctxCustos = document.getElementById('custosChart').getContext('2d');
+    var custosChart = new Chart(ctxCustos, {
+        type: 'bar',
+        data: {
+            labels: {{ grafico_custos.labels|safe }},
+            datasets: [{
+                label: 'Valor',
+                data: {{ grafico_custos.data|safe }},
+                backgroundColor: {{ grafico_custos.backgroundColor|safe }},
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

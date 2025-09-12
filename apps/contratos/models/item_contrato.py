@@ -8,9 +8,10 @@ class ItemContrato(models.Model):
     '''
     
     SITUACAO_CHOICES = [
-        ('1', 'Lançado'),
+        ('1', 'Pendente'),
         ('2', 'Cancelado'),
-        ('3', 'Liquidado'),
+        ('3', 'Paga'),
+        ('4', 'Parcialmente Paga'),
     ]
     
     num_contrato = models.ForeignKey(

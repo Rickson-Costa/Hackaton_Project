@@ -1,43 +1,33 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Prestadores de Serviço - FUNETEC{% endblock %}
-{% block page_title %}Prestadores de Serviço{% endblock %}
-
 {% block content %}
-<div class="card shadow-sm">
-    <div class="card-header">
-        <h5 class="mb-0">Lista de Prestadores</h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Prestadores de Serviço</h2>
+            <a href="#" class="btn btn-success">Cadastrar Novo Prestador</a>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>Nome / Razão Social</th>
-                        <th>CPF / CNPJ</th>
+                        <th>Nome/Razão Social</th>
+                        <th>CPF/CNPJ</th>
                         <th>Tipo</th>
-                        <th>Email</th>
-                        <th>Telefone</th>
-                        <th class="text-end">Ações</th>
+                        <th>Status</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for prestador in prestadores %}
+                    {% for p in prestadores %}
                     <tr>
-                        <td><strong>{{ prestador.nome }}</strong></td>
-                        <td>{{ prestador.cpf_cnpj }}</td>
-                        <td>{{ prestador.get_tipo_pessoa_display }}</td>
-                        <td>{{ prestador.email|default:"-" }}</td>
-                        <td>{{ prestador.telefone|default:"-" }}</td>
-                        <td class="text-end">
-                            <a href="{% url 'contratos:prestador_detail' prestador.pk %}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-eye"></i> Detalhes
-                            </a>
+                        <td>{{ p.nome }}</td>
+                        <td>{{ p.cpf_cnpj }}</td>
+                        <td>{{ p.get_tipo_pessoa_display }}</td>
+                        <td><span class="badge bg-success">Ativo</span></td>
+                        <td>
+                            <a href="{% url 'contratos:prestador_detail' p.pk %}" class="btn btn-info btn-sm">Ver Detalhes</a>
                         </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">Nenhum prestador encontrado.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

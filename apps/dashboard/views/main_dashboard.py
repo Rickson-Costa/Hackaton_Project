@@ -9,73 +9,55 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Dados estáticos para evitar erros enquanto desenvolvemos
-        context.update({
-            'metricas_projetos': {
-                'total': 0,
-                'em_andamento': 0,
-                'atrasados': 0,
-                'concluidos': 0,
-                'valor_total': 0,
-                'valor_realizado': 0,
-                'percentual_realizado': 0,
-                'status_geral': 'normal'
-            },
-            'metricas_contratos': {
-                'total': 0,
-                'ativos': 0,
-                'pessoa_fisica': 0,
-                'pessoa_juridica': 0,
-                'valor_total': 0,
-                'valor_pago': 0,
-                'valor_pendente': 0,
-                'percentual_pago': 0
-            },
-            'metricas_financeiras': {
-                'parcelas_vencidas': 0,
-                'valor_vencido': 0,
-                'parcelas_proximas': 0,
-                'valor_a_vencer': 0,
-                'status_cobranca': 'normal'
-            },
-            'alertas': [],
-            'projetos_recentes': [],
-            'parcelas_vencimento': [],
-            'graficos_config': {
-                'projetos_por_situacao': {
-                    'labels': ['Aguardando', 'Em Andamento', 'Concluído'],
-                    'data': [0, 0, 0],
-                    'backgroundColor': ['#6c757d', '#007bff', '#28a745']
-                },
-                'contratos_por_tipo': {
-                    'labels': ['Pessoa Física', 'Pessoa Jurídica'],
-                    'data': [0, 0],
-                    'backgroundColor': ['#007bff', '#28a745']
-                },
-                'evolucao_financeira': {
-                    'labels': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
-                    'datasets': [
-                        {
-                            'label': 'Valor Orçado',
-                            'data': [0, 0, 0, 0, 0, 0],
-                            'borderColor': '#007bff',
-                            'backgroundColor': 'rgba(0, 123, 255, 0.1)'
-                        },
-                        {
-                            'label': 'Valor Realizado',
-                            'data': [0, 0, 0, 0, 0, 0],
-                            'borderColor': '#28a745',
-                            'backgroundColor': 'rgba(40, 167, 69, 0.1)'
-                        }
-                    ]
-                },
-                'status_projetos': {
-                    'verde': 0,
-                    'amarelo': 0,
-                    'vermelho': 0,
-                    'total': 0
-                }
-            }
-        })
+        # Importar modelos aqui para evitar import circular
+        from apps.projetos.models import Projeto
+        from apps.contratos.models import Contrato, ItemContrato
+
+        # =====================================================================
+        # Métricas de Projetos
+        # =====================================================================
+        projetos = Projeto.objects.all()
+        total_projetos = projetos.count()
+        em_andamento = projetos.filter(situacao='2').count()
+        concluidos = projetos.filter(situacao='6').count()
         
+        agregados_projetos = projetos.aggregate(
+            valor_total=models.Sum('valor'),
+            valor_realizado=models.Sum('valor_realizado'),
+            custo_previsto=models.Sum('custo_previsto'),
+            custo_realizado=models.Sum('custo_realizado')
+        )
+        
+        custo_previsto_total = agregados_projetos.get('custo_previsto') or 0
+        custo_realizado_total = agregados_projetos.get('custo_realizado') or 0
+
+        context['metricas_projetos'] = {
+            'total': total_projetos,
+            'em_andamento': em_andamento,
+            'concluidos': concluidos,
+            'atrasados': 0,  # Lógica de atraso a ser implementada
+            'valor_total': agregados_projetos.get('valor_total') or 0,
+            'custo_previsto': custo_previsto_total,
+            'custo_realizado': custo_realizado_total,
+        }
+
+        # =====================================================================
+        # Gráficos
+        # =====================================================================
+        # Gráfico de Comparativo de Custos
+        context['grafico_custos'] = {
+            'labels': ['Custo Previsto', 'Custo Realizado'],
+            'data': [float(custo_previsto_total), float(custo_realizado_total)],
+            'backgroundColor': ['#007bff', '#28a745'],
+        }
+
+        # Manter outros dados estáticos por enquanto
+        context.update({
+            'metricas_contratos': {'total': 0, 'ativos': 0, 'pessoa_fisica': 0, 'pessoa_juridica': 0, 'valor_total': 0, 'valor_pago': 0, 'valor_pendente': 0, 'percentual_pago': 0},
+            'metricas_financeiras': {'parcelas_vencidas': 0, 'valor_vencido': 0, 'parcelas_proximas': 0, 'valor_a_vencer': 0, 'status_cobranca': 'normal'},
+            'alertas': [],
+            'projetos_recentes': projetos.order_by('-created_at')[:5],
+            'parcelas_vencimento': [],
+        })
+
         return context
