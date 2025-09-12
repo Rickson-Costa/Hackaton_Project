@@ -12,20 +12,6 @@ from apps.core.middleware import BaseService
 
 from ..services.financeiro_analytics import FinanceiroAnalyticsService
 
-class FinanceiroAnalyticsView(LoginRequiredMixin, TemplateView):
-    template_name = "dashboard/analytics_financeiro.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        svc = FinanceiroAnalyticsService()
-        context.update({
-            'resumo': svc.get_resumo_financeiro(),
-            'receitas_por_mes': svc.get_receitas_por_mes(),
-            'despesas_por_mes': svc.get_despesas_por_mes(),
-        })
-        return context
-
-
 class ProjetosAnalyticsView(LoginRequiredMixin, TemplateView):
     """View para analytics de projetos"""
     template_name = 'dashboard/analytics/projetos.html'
