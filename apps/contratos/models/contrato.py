@@ -27,7 +27,7 @@ class Contrato(models.Model):
     )
     cod_ordem = models.OneToOneField(
         'projetos.Ordem',
-        on_delete=models.RESTRICT,
+        on_delete=models.PROTECT,
         db_column='codOrdem',
         related_name='contrato',
         verbose_name='Ordem de Serviço'
@@ -75,6 +75,27 @@ class Contrato(models.Model):
         choices=SITUACAO_CHOICES,
         verbose_name='Situação'
     )
+
+    @classmethod
+    def gerar_numero_contrato(cls):
+        """Gera próximo número de contrato no formato NNNN/AAAA"""
+        from django.utils import timezone
+        ano_atual = timezone.now().year
+        
+        # Buscar último contrato do ano
+        ultimo_contrato = cls.objects.filter(
+            num_contrato__endswith=f'/{ano_atual}'
+        ).order_by('-num_contrato').first()
+        
+        if ultimo_contrato:
+            numero = int(ultimo_contrato.num_contrato.split('/')[0]) + 1
+        else:
+            numero = 1
+        
+        return f"{numero:04d}/{ano_atual}"
+
+    def __str__(self):
+        return f"{self.num_contrato} - {self.contratado}"
     
     class Meta:
         db_table = 'contrato'

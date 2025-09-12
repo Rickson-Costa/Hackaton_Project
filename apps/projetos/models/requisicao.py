@@ -5,6 +5,7 @@ class Requisicao(models.Model):
     '''
     Modelo alinhado com tabela requisicao
     '''
+    from .projeto import Projeto
     
     SITUACAO_CHOICES = [
         ('1', 'Aguardando Início'),
@@ -19,8 +20,8 @@ class Requisicao(models.Model):
         verbose_name='Código da Requisição'
     )
     cod_projeto = models.ForeignKey(
-        Projeto,
-        on_delete=models.RESTRICT,
+        'projetos.Projeto',  # Use string reference
+        on_delete=models.PROTECT,
         db_column='codProjeto',
         related_name='requisicoes',
         verbose_name='Projeto'

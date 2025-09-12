@@ -6,6 +6,8 @@ class ItemContrato(models.Model):
     '''
     Modelo alinhado com tabela itens_contrato
     '''
+    from apps.projetos.models.ordem import Ordem
+    from apps.contratos.models.contrato import Contrato
     
     SITUACAO_CHOICES = [
         ('1', 'Lançado'),
@@ -14,10 +16,10 @@ class ItemContrato(models.Model):
     ]
     
     num_contrato = models.ForeignKey(
-        Contrato,
+        'contratos.Contrato',  # Use string reference
         on_delete=models.CASCADE,
         db_column='numContrato',
-        related_name='itens'
+        related_name='itens'  # Mudei de 'itens_contrato' para 'itens'
     )
     cod_lancamento = models.IntegerField(
         verbose_name='Código do Lançamento'
@@ -52,7 +54,16 @@ class ItemContrato(models.Model):
         choices=SITUACAO_CHOICES,
         verbose_name='Situação'
     )
-    
+    def get_valor_pendente(self):
+        """Retorna valor pendente da parcela"""
+        return self.valor_parcela - self.valor_pago
+
+    def get_valor_total(self):
+        """Retorna valor total da parcela"""
+        return self.valor_parcela
+
+    def __str__(self):
+        return f"Parcela {self.num_parcela} - {self.num_contrato}"
     class Meta:
         db_table = 'itens_contrato'
         verbose_name = 'Item do Contrato'

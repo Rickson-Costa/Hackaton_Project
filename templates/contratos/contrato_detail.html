@@ -56,23 +56,14 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in contrato.itens_contrato.all %}
+                {% for item in contrato.itens.all %}
                 <tr>
-                    <td>{{ item.numParcela }}</td>
-                    <td>{{ item.dataVencimento|date:"d/m/Y" }}</td>
-                    <td>R$ {{ item.valorParcela|floatformat:2 }}</td>
-                    <td>R$ {{ item.valorPago|default:"0.00"|floatformat:2 }}</td>
+                    <td>{{ item.num_parcela }}</td>
+                    <td>{{ item.data_vencimento|date:"d/m/Y" }}</td>
+                    <td>R$ {{ item.valor_parcela|floatformat:2 }}</td>
+                    <td>R$ {{ item.valor_pago|default:"0.00"|floatformat:2 }}</td>
                     <td><span class="badge bg-info">{{ item.get_situacao_display }}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-success btn-pagar"
-                                data-bs-toggle="modal"
-                                data-bs-target="#pagamentoModal"
-                                data-parcela-pk="{{ item.pk }}"
-                                data-parcela-num="{{ item.num_parcela }}"
-                                data-valor-pendente="{{ item.get_valor_pendente }}">
-                            <i class="fas fa-dollar-sign"></i> Registrar Pagamento
-                        </button>
-                    </td>
+                    <td><!-- ações --></td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="6" class="text-center">Nenhuma parcela encontrada.</td></tr>

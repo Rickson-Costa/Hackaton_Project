@@ -6,7 +6,8 @@ class Ordem(models.Model):
     '''
     Modelo alinhado com tabela ordem
     '''
-    
+    from .requisicao import Requisicao
+
     SITUACAO_CHOICES = [
         ('1', 'Aguardando Início'),
         ('2', 'Em andamento'),
@@ -19,8 +20,8 @@ class Ordem(models.Model):
         verbose_name='Código da Ordem'
     )
     cod_requisicao = models.ForeignKey(
-        Requisicao,
-        on_delete=models.RESTRICT,
+        'projetos.Requisicao',  # Use string reference
+        on_delete=models.PROTECT,  # Consistente com outros models
         db_column='codRequisicao',
         related_name='ordens',
         verbose_name='Requisição'
