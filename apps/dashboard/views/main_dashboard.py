@@ -2,7 +2,10 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import models
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'dashboard/index.html'
     
