@@ -23,8 +23,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
-                <p><strong>Código:</strong> #{{ projeto.codProjeto }}</p>
-                <p><strong>Responsável:</strong> {{ projeto.responsavel.get_full_name|default:projeto.responsavel.username }}</p>
+                <p><strong>Código:</strong> #{{ projeto.cod_projeto }}</p>
                 <p><strong>Situação:</strong> <span class="badge bg-primary">{{ projeto.get_situacao_display }}</span></p>
             </div>
             <div class="col-md-6">

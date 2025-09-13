@@ -15,7 +15,6 @@
                 <thead>
                     <tr>
                         <th>Nome do Projeto</th>
-                        <th>Responsável</th>
                         <th>Situação</th>
                         <th>Valor Orçado</th>
                         <th>Data de Encerramento</th>
@@ -27,14 +26,14 @@
                     <tr>
                         <td>
                             <strong>{{ projeto.nome }}</strong><br>
-                            <small class="text-muted">#{{ projeto.codProjeto }}</small>
+                            <small class="text-muted">#{{ projeto.cod_projeto }}</small>
                         </td>
-                        <td>{{ projeto.responsavel.get_full_name|default:projeto.responsavel.username }}</td>
                         <td>
                             <span class="badge bg-primary">{{ projeto.get_situacao_display }}</span>
                         </td>
                         <td>R$ {{ projeto.valor|floatformat:2 }}</td>
-                        <td>{{ projeto.data_encerramento|date:"d/m/Y" }}</td>
+                        
+                        <td>{{ projeto.data_encerramento }}</td>
                         <td>
                             <a href="{% url 'projetos:projeto_detail' projeto.pk %}" class="btn btn-sm btn-outline-info" title="Ver Detalhes">
                                 <i class="fas fa-eye"></i>
