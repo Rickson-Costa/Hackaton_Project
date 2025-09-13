@@ -14,6 +14,7 @@ services:
   db:
     image: postgres:13
     volumes:
+      - ./inserts:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_DB=funetec_db

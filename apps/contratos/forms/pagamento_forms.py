@@ -1,5 +1,5 @@
 from django import forms
-from ..models.item_contrato import ItemContrato
+from apps.contratos.models.item_contrato import ItemContrato
 
 class ItemContratoForm(forms.ModelForm):
     class Meta:
@@ -8,3 +8,6 @@ class ItemContratoForm(forms.ModelForm):
         widgets = {
             'data_vencimento': forms.DateInput(attrs={'type': 'date'}),
         }
+class RegistrarPagamentoForm(forms.Form):
+         # Add your form fields here
+         pass

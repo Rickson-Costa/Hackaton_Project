@@ -1,46 +1,462 @@
 {% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}Lista de Contratos - FUNETEC{% endblock %}
-{% block page_title %}Contratos{% endblock %}
+{% block page_title %}Gestão de Contratos{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group">
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#filterModal">
+        <i class="fas fa-filter me-1"></i> Filtros
+    </button>
+    <a href="{# url 'contratos:contrato_export' #}?format=excel" class="btn btn-outline-success">
+        <i class="fas fa-file-excel me-1"></i> Excel
+    </a>
+    <a href="{# url 'contratos:contrato_export' #}?format=pdf" class="btn btn-outline-danger">
+        <i class="fas fa-file-pdf me-1"></i> PDF
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contrato-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: 1px solid #dee2e6;
+    }
+    
+    .contrato-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .status-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    
+    .status-1 { background-color: #6c757d; }
+    .status-2 { background-color: #28a745; }
+    .status-3 { background-color: #dc3545; }
+    .status-4 { background-color: #6f42c1; }
+    
+    .progress-mini {
+        height: 4px;
+        background-color: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .progress-bar-mini {
+        height: 100%;
+        background: linear-gradient(90deg, #28a745, #20c997);
+        transition: width 0.3s ease;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .vencida { border-left: 4px solid #dc3545; }
+    .vence-hoje { border-left: 4px solid #ffc107; }
+    .em-dia { border-left: 4px solid #28a745; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm">
-    <div class="card-header"><h5 class="mb-0">Todos os Contratos</h5></div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nº Contrato</th>
-                        <th>Contratado</th>
-                        <th>Valor Total</th>
-                        <th>Situação</th>
-                        <th>Vigência</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for contrato in contratos %}
-                    <tr>
-                        <td><strong>{{ contrato.num_contrato }}</strong></td>
-                        <td>{{ contrato.contratado }}</td>
-                        <td>R$ {{ contrato.valor|floatformat:2 }}</td>
-                        <td><span class="badge bg-success">{{ contrato.get_situacao_display }}</span></td>
-                        <td>{{ contrato.data_inicio|date:"d/m/y" }} a {{ contrato.data_fim|date:"d/m/y" }}</td>
-                        <td>
-                            <a href="{% url 'contratos:contrato_detail' contrato.pk %}" class="btn btn-sm btn-outline-info" title="Ver Detalhes">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center text-muted">Nenhum contrato encontrado.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<!-- Estatísticas Resumidas -->
+<div class="stats-card">
+    <h5 class="text-center mb-4">
+        <i class="fas fa-chart-bar me-2"></i>
+        Resumo Geral dos Contratos
+    </h5>
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number">{{ stats.total_contratos }}</div>
+            <div class="stat-label">Total de Contratos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ stats.contratos_ativos }}</div>
+            <div class="stat-label">Contratos Ativos</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">R$ {{ stats.valor_total|floatformat:0 }}</div>
+            <div class="stat-label">Valor Total</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ stats.parcelas_vencidas }}</div>
+            <div class="stat-label">Parcelas Vencidas</div>
         </div>
     </div>
 </div>
+
+<!-- Filtros Aplicados -->
+{% if current_filters.search or current_filters.situacao or current_filters.tipo_pessoa %}
+<div class="alert alert-info d-flex justify-content-between align-items-center">
+    <div>
+        <i class="fas fa-filter me-2"></i>
+        <strong>Filtros ativos:</strong>
+        {% if current_filters.search %}
+            Busca: "{{ current_filters.search }}"
+        {% endif %}
+        {% if current_filters.situacao %}
+            Situação: "{{ current_filters.situacao }}"
+        {% endif %}
+        {% if current_filters.tipo_pessoa %}
+            Tipo: "{{ current_filters.tipo_pessoa }}"
+        {% endif %}
+    </div>
+    <a href="{% url 'contratos:contrato_list' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-times me-1"></i> Limpar
+    </a>
+</div>
+{% endif %}
+
+<!-- Lista de Contratos -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white">
+        <div class="row align-items-center">
+            <div class="col">
+                <h5 class="mb-0">
+                    <i class="fas fa-file-contract me-2"></i>
+                    Contratos ({{ contratos|length }} de {{ total_contratos }})
+                </h5>
+            </div>
+            <div class="col-auto">
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary active" onclick="toggleView('table')">
+                        <i class="fas fa-table"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="toggleView('cards')">
+                        <i class="fas fa-th"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-body p-0">
+        <!-- Visualização em Tabela -->
+        <div id="table-view">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="12%">Nº Contrato</th>
+                            <th width="25%">Contratado</th>
+                            <th width="12%">Tipo</th>
+                            <th width="15%">Valor Total</th>
+                            <th width="12%">Progresso</th>
+                            <th width="12%">Situação</th>
+                            <th width="12%">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contrato in contratos %}
+                        <tr class="{% if contrato.tem_parcelas_vencidas %}vencida{% elif contrato.get_proxima_parcela.data_vencimento == today %}vence-hoje{% else %}em-dia{% endif %}">
+                            <td>
+                                <strong>{{ contrato.num_contrato }}</strong>
+                                {% if contrato.tem_parcelas_vencidas %}
+                                    <br><small class="text-danger">
+                                        <i class="fas fa-exclamation-triangle"></i> Vencida
+                                    </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div>{{ contrato.contratado }}</div>
+                                <small class="text-muted">{{ contrato.cpf_cnpj }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">
+                                    {{ contrato.get_tipo_pessoa_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong>R$ {{ contrato.valor|floatformat:2 }}</strong>
+                                <br><small class="text-success">
+                                    Pago: R$ {{ contrato.valor_pago|floatformat:2 }}
+                                </small>
+                            </td>
+                            <td>
+                                <div class="progress-mini">
+                                    <div class="progress-bar-mini" style="width: {{ contrato.get_percentual_pago }}%"></div>
+                                </div>
+                                <small class="text-muted">{{ contrato.get_percentual_pago|floatformat:1 }}%</small>
+                            </td>
+                            <td>
+                                <span class="status-indicator status-{{ contrato.situacao }}"></span>
+                                {{ contrato.get_situacao_display }}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'contratos:contrato_detail' contrato.pk %}" 
+                                       class="btn btn-outline-info" 
+                                       title="Ver Detalhes">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'contratos:contrato_update' contrato.pk %}" 
+                                       class="btn btn-outline-primary" 
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% if contrato.get_proxima_parcela %}
+                                    <button class="btn btn-outline-success" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#quickPayModal"
+                                            data-contrato="{{ contrato.num_contrato }}"
+                                            data-valor="{{ contrato.get_proxima_parcela.get_valor_pendente }}"
+                                            title="Pagamento Rápido">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3 d-block"></i>
+                                <h6 class="text-muted">Nenhum contrato encontrado</h6>
+                                <p class="text-muted mb-0">
+                                    {% if current_filters.search or current_filters.situacao or current_filters.tipo_pessoa %}
+                                        Tente ajustar os filtros ou 
+                                        <a href="{% url 'contratos:contrato_list' %}">limpar a busca</a>
+                                    {% else %}
+                                        Não há contratos cadastrados no sistema.
+                                    {% endif %}
+                                </p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Visualização em Cards -->
+        <div id="cards-view" style="display: none;">
+            <div class="row p-3">
+                {% for contrato in contratos %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card contrato-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title mb-0">{{ contrato.num_contrato }}</h6>
+                                <span class="status-indicator status-{{ contrato.situacao }}"></span>
+                            </div>
+                            
+                            <p class="card-text">
+                                <strong>{{ contrato.contratado }}</strong><br>
+                                <small class="text-muted">{{ contrato.get_tipo_pessoa_display }}</small>
+                            </p>
+                            
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <small>Progresso</small>
+                                    <small>{{ contrato.get_percentual_pago|floatformat:1 }}%</small>
+                                </div>
+                                <div class="progress-mini">
+                                    <div class="progress-bar-mini" style="width: {{ contrato.get_percentual_pago }}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between text-sm mb-3">
+                                <span class="text-muted">Total:</span>
+                                <strong>R$ {{ contrato.valor|floatformat:2 }}</strong>
+                            </div>
+                            
+                            <div class="btn-group w-100">
+                                <a href="{% url 'contratos:contrato_detail' contrato.pk %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'contratos:contrato_update' contrato.pk %}" 
+                                   class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if contrato.get_proxima_parcela %}
+                                <button class="btn btn-sm btn-outline-success" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#quickPayModal">
+                                    <i class="fas fa-dollar-sign"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Paginação -->
+{% if is_paginated %}
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+        {% endif %}
+
+        {% for i in paginator.page_range %}
+            {% if page_obj.number == i %}
+                <li class="page-item active">
+                    <span class="page-link">{{ i }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- Modal de Filtros -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-filter me-2"></i>
+                    Filtros de Busca
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="get">
+                    {# crispy filter_form #}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Pagamento Rápido -->
+<div class="modal fade" id="quickPayModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-zap me-2"></i>
+                    Pagamento Rápido
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Registrar pagamento para o contrato <strong id="quickPayContrato"></strong>?</p>
+                <p>Valor: <strong class="text-success" id="quickPayValor"></strong></p>
+                
+                <form id="quickPayForm" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="quickPayContratoId" name="contrato_id">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check me-1"></i>
+                            Confirmar Pagamento
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle entre visualizações
+    window.toggleView = function(view) {
+        const tableView = document.getElementById('table-view');
+        const cardsView = document.getElementById('cards-view');
+        const buttons = document.querySelectorAll('.btn-group button');
+        
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        if (view === 'table') {
+            tableView.style.display = 'block';
+            cardsView.style.display = 'none';
+            buttons[0].classList.add('active');
+        } else {
+            tableView.style.display = 'none';
+            cardsView.style.display = 'block';
+            buttons[1].classList.add('active');
+        }
+        
+        // Salvar preferência no localStorage
+        localStorage.setItem('contratos_view', view);
+    };
+    
+    // Restaurar preferência de visualização
+    const savedView = localStorage.getItem('contratos_view');
+    if (savedView) {
+        toggleView(savedView);
+    }
+    
+    // Modal de pagamento rápido
+    const quickPayModal = document.getElementById('quickPayModal');
+    quickPayModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const contrato = button.getAttribute('data-contrato');
+        const valor = button.getAttribute('data-valor');
+        
+        document.getElementById('quickPayContrato').textContent = contrato;
+        document.getElementById('quickPayValor').textContent = 'R$ ' + valor;
+        document.getElementById('quickPayContratoId').value = contrato;
+        
+        document.getElementById('quickPayForm').action = '/contratos/quick-pay/';
+    });
+    
+    // Auto-refresh da página a cada 5 minutos para atualizar status
+    setTimeout(function() {
+        window.location.reload();
+    }, 300000);
+});
+</script>
 {% endblock %}

@@ -4,14 +4,6 @@
 
 {% block page_title %}Projetos{% endblock %}
 
-{% block page_actions %}
-    {% if perms.projetos.add_projeto %}
-        <a href="{% url 'projetos:projeto_create' %}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> Novo Projeto
-        </a>
-    {% endif %}
-{% endblock %}
-
 {% block content %}
 <div class="card shadow-sm">
     <div class="card-header">

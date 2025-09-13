@@ -23,17 +23,20 @@ class ItemOrdem(models.Model):
         related_name='itens'
     )
     cod_item = models.IntegerField(
-        verbose_name='Código do Item'
+        verbose_name='Código do Item',
+        db_column='codItem'
     )
     descricao = models.CharField(
         max_length=500,
         verbose_name='Descrição'
     )
     data_solicitacao = models.DateField(
-        verbose_name='Data de Solicitação'
+        verbose_name='Data de Solicitação',
+        db_column='dataSolicitacao'
     )
     data_limite = models.DateField(
-        verbose_name='Data Limite'
+        verbose_name='Data Limite',
+        db_column='dataLimite'
     )
     valor = models.DecimalField(
         max_digits=14,
@@ -43,6 +46,7 @@ class ItemOrdem(models.Model):
     data_recebido = models.DateField(
         null=True,
         blank=True,
+        db_column='dataRecebimento',
         verbose_name='Data de Recebimento'
     )
     situacao = models.CharField(
