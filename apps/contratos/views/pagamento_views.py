@@ -9,6 +9,8 @@ from django.views.generic import ListView, CreateView
 from ..forms.pagamento_forms import ItemContratoForm
 from ..models.contrato import Contrato
 
+from django.db import models
+from django.utils import timezone
 
 class ParcelaListView(LoginRequiredMixin, ListView):
     model = ItemContrato
@@ -45,34 +47,41 @@ class ItemContratoCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('contratos:contrato_detail', kwargs={'pk': self.contrato.pk})
 
 
-class RegistrarPagamentoView(View):
-    def post(self, request, *args, **kwargs):
-        parcela = get_object_or_404(ItemContrato, pk=self.kwargs['parcela_pk'])
+class RegistrarPagamentoView(LoginRequiredMixin, View):
+    def post(self, request, parcela_pk):
+        parcela = get_object_or_404(ItemContrato, pk=parcela_pk)
         valor_pago_str = request.POST.get('valor_pago')
-
+        
         if not valor_pago_str:
             messages.error(request, "O valor pago é obrigatório.")
             return redirect('contratos:contrato_detail', pk=parcela.num_contrato.pk)
-
+        
         try:
             valor_pago = Decimal(valor_pago_str)
         except:
             messages.error(request, "Valor pago inválido.")
             return redirect('contratos:contrato_detail', pk=parcela.num_contrato.pk)
-
-        if valor_pago <= 0:
-            messages.error(request, "O valor pago deve ser maior que zero.")
-            return redirect('contratos:contrato_detail', pk=parcela.num_contrato.pk)
-
-        parcela.valor_pago += valor_pago
         
+        # Registrar pagamento
+        parcela.valor_pago += valor_pago
+        parcela.data_pagamento = timezone.now().date()
+        
+        # Atualizar status
         if parcela.valor_pago >= parcela.valor_parcela:
-            parcela.status = '3' # Paga
-            parcela.valor_pago = parcela.valor_parcela # Evita pagar a mais
+            parcela.situacao = '3'  # Paga
+            parcela.valor_pago = parcela.valor_parcela  # Não deixar pagar a mais
         elif parcela.valor_pago > 0:
-            parcela.status = '4' # Parcialmente Paga
+            parcela.situacao = '4'  # Parcialmente Paga
         
         parcela.save()
-
-        messages.success(request, "Pagamento registrado com sucesso.")
-        return redirect('contratos:contrato_detail', pk=parcela.num_contrato.pk)
+        
+        # Atualizar totais do contrato
+        contrato = parcela.num_contrato
+        contrato.valor_pago = contrato.itens.aggregate(
+            total=models.Sum('valor_pago')
+        )['total'] or 0
+        contrato.valor_pendente = contrato.valor - contrato.valor_pago
+        contrato.save()
+        
+        messages.success(request, f"Pagamento de R$ {valor_pago} registrado com sucesso!")
+        return redirect('contratos:contrato_detail', pk=contrato.pk)

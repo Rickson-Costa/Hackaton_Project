@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
-from ..models.contrato import Contrato, Prestador
+from ..models.contrato import Contrato
 from ..forms.contrato_forms import ContratoForm
 from apps.projetos.models.ordem import Ordem
 
@@ -55,21 +55,3 @@ class ContratoUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse_lazy('contratos:contrato_detail', kwargs={'pk': self.object.pk})
     
-
-
-class PrestadorListView(LoginRequiredMixin, ListView):
-    model = Prestador
-    template_name = 'contratos/prestador_list.html'
-    context_object_name = 'prestadores'
-    paginate_by = 10
-
-class PrestadorDetailView(LoginRequiredMixin, DetailView):
-    model = Prestador
-    template_name = 'contratos/prestador_detail.html'
-    context_object_name = 'prestador'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        prestador = self.get_object()
-        context['contratos'] = Contrato.objects.filter(cpf_cnpj=prestador.cpf_cnpj)
-        return context

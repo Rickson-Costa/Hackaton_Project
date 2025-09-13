@@ -10,8 +10,7 @@ class OrdemForm(forms.ModelForm):
             'data_solicitacao', 
             'data_limite', 
             'valor', 
-            'situacao',
-            'executante'
+            'situacao'
         ]
         widgets = {
             'data_solicitacao': forms.DateInput(attrs={'type': 'date'}),

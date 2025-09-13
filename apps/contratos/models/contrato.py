@@ -2,11 +2,15 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from decimal import Decimal
+from .item_contrato import ItemContrato
+from apps.projetos.models.ordem import Ordem
+from apps.projetos.models.projeto import Projeto
 
 class Contrato(models.Model):
     '''
     Modelo alinhado com tabela contrato
     '''
+
     
     SITUACAO_CHOICES = [
         ('1', 'Lançado'),
@@ -97,6 +101,37 @@ class Contrato(models.Model):
     def __str__(self):
         return f"{self.num_contrato} - {self.contratado}"
     
+    def gerar_parcelas(self):
+        """Gera as parcelas automaticamente baseado no número de parcelas"""
+        from dateutil.relativedelta import relativedelta
+        
+        # Limpar parcelas existentes
+        self.itens.all().delete()
+        
+        valor_parcela = self.valor / self.parcelas
+        data_vencimento = self.data_parcela_inicial
+        
+        for i in range(1, self.parcelas + 1):
+            ItemContrato.objects.create(
+                num_contrato=self,
+                cod_lancamento=i,
+                data_lancamento=self.data_inicio,
+                num_parcela=i,
+                valor_parcela=valor_parcela,
+                data_vencimento=data_vencimento,
+                situacao='1'  # Pendente
+            )
+            # Próxima parcela: adiciona 1 mês
+            data_vencimento = data_vencimento + relativedelta(months=1)
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        # Gerar parcelas automaticamente para contratos novos
+        if is_new and self.parcelas > 0:
+            self.gerar_parcelas()
+
     class Meta:
         db_table = 'contrato'
         verbose_name = 'Contrato'

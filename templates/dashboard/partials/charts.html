@@ -1,0 +1,171 @@
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Fluxo de Caixa Projetado</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="fluxoCaixaChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Status dos Contratos</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="statusContratosChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Evolução Mensal</h5>
+                <div class="btn-group btn-group-sm" role="group">
+                    <input type="radio" class="btn-check" name="periodo" id="periodo6m" value="6" checked>
+                    <label class="btn btn-outline-primary" for="periodo6m">6M</label>
+                    
+                    <input type="radio" class="btn-check" name="periodo" id="periodo12m" value="12">
+                    <label class="btn btn-outline-primary" for="periodo12m">12M</label>
+                    
+                    <input type="radio" class="btn-check" name="periodo" id="periodo24m" value="24">
+                    <label class="btn btn-outline-primary" for="periodo24m">24M</label>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="evolucaoMensalChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuração dos gráficos
+    Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+    Chart.defaults.color = '#666';
+    
+    // Fluxo de Caixa
+    const fluxoCtx = document.getElementById('fluxoCaixaChart').getContext('2d');
+    new Chart(fluxoCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+            datasets: [{
+                label: 'Receitas Previstas',
+                data: [120000, 150000, 180000, 140000, 200000, 170000],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Receitas Realizadas',
+                data: [100000, 130000, 160000, 120000, 180000, 150000],
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': R$ ' + 
+                                   context.parsed.y.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + (value / 1000) + 'k';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Status dos Contratos
+    const statusCtx = document.getElementById('statusContratosChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Em Andamento', 'Finalizados', 'Cancelados', 'Lançados'],
+            datasets: [{
+                data: [45, 30, 5, 20],
+                backgroundColor: [
+                    '#28a745',
+                    '#007bff', 
+                    '#dc3545',
+                    '#ffc107'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    
+    // Evolução Mensal
+    const evolucaoCtx = document.getElementById('evolucaoMensalChart').getContext('2d');
+    const evolucaoChart = new Chart(evolucaoCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+            datasets: [{
+                label: 'Novos Contratos',
+                data: [8, 12, 6, 15, 10, 9],
+                backgroundColor: '#007bff',
+                borderRadius: 4
+            }, {
+                label: 'Contratos Finalizados',
+                data: [5, 8, 4, 10, 7, 6],
+                backgroundColor: '#28a745',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+    
+    // Controle de período
+    document.querySelectorAll('input[name="periodo"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const meses = parseInt(this.value);
+            // Aqui você faria uma requisição AJAX para buscar os dados
+            // updateChart(evolucaoChart, meses);
+        });
+    });
+});
+</script>

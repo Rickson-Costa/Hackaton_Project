@@ -46,7 +46,12 @@ class Ordem(models.Model):
         choices=SITUACAO_CHOICES,
         verbose_name='Situação'
     )
-    
+    def save(self, *args, **kwargs):
+        if not self.cod_ordem:
+            # Auto-gerar código da ordem
+            ultima_ordem = Ordem.objects.order_by('-cod_ordem').first()
+            self.cod_ordem = (ultima_ordem.cod_ordem + 1) if ultima_ordem else 1
+        super().save(*args, **kwargs)
     class Meta:
         db_table = 'ordem'
         verbose_name = 'Ordem de Serviço'

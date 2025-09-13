@@ -83,8 +83,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'funetec_system.wsgi.application'
 
 # Database
+
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres://funetec_user:funetec_pass@db:5432/funetec_db')
+'default': env.db('DATABASE_URL', default='postgres://funetec_user:funetec_pass@db:5432/funetec_db')
 }
 
 # Password validation

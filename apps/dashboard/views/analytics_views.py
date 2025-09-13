@@ -252,8 +252,8 @@ class ProjetosAnalyticsService(BaseService):
             meses.insert(0, mes.strftime('%b/%Y'))
             
             criados = self._get_projetos_queryset().filter(
-                created_at__year=mes.year,
-                created_at__month=mes.month
+                data_criacao__year=mes.year,
+                data_criacao__month=mes.month
             ).count()
             
             concluidos = self._get_projetos_queryset().filter(
@@ -499,14 +499,11 @@ class FinanceiroAnalyticsService(BaseService):
         mes_anterior = (mes_atual - timedelta(days=1)).replace(day=1)
         
         # Valores do mês atual
-        contratos_mes = Contrato.objects.filter(created_at__gte=mes_atual)
+        contratos_mes = Contrato.objects.filter(data_inicio__gte=mes_atual)
         valor_mes = contratos_mes.aggregate(Sum('valor'))['valor__sum'] or 0
         
         # Valores do mês anterior
-        contratos_mes_anterior = Contrato.objects.filter(
-            created_at__gte=mes_anterior,
-            created_at__lt=mes_atual
-        )
+        contratos_mes_anterior = Contrato.objects.filter(data_inicio__gte=mes_anterior)
         valor_mes_anterior = contratos_mes_anterior.aggregate(Sum('valor'))['valor__sum'] or 0
         
         # Crescimento

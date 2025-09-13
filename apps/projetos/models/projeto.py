@@ -15,20 +15,22 @@ class Projeto(models.Model):
         ('5', 'Cancelado'),
         ('6', 'Concluído'),
     ]
-    
     cod_projeto = models.IntegerField(
         primary_key=True,
-        verbose_name='Código do Projeto'
+        verbose_name='Código do Projeto',
+        db_column='codProjeto'
     )
     nome = models.CharField(
         max_length=200,
         verbose_name='Nome do Projeto'
     )
     data_inicio = models.DateField(
-        verbose_name='Data de Início'
+        verbose_name='Data de Início',
+        db_column='dataInicio'
     )
     data_encerramento = models.DateField(
-        verbose_name='Data de Encerramento'
+        verbose_name='Data de Encerramento',
+        db_column='dataEncerramento'
     )
     valor = models.DecimalField(
         max_digits=14,
@@ -40,7 +42,13 @@ class Projeto(models.Model):
         choices=SITUACAO_CHOICES,
         verbose_name='Situação'
     )
-    
+
+    def save(self, *args, **kwargs):
+        if not self.cod_projeto:
+            # Auto-gerar código do projeto
+            ultimo_projeto = Projeto.objects.order_by('-cod_projeto').first()
+            self.cod_projeto = (ultimo_projeto.cod_projeto + 1) if ultimo_projeto else 1
+        super().save(*args, **kwargs)
     class Meta:
         db_table = 'projetos'
         verbose_name = 'Projeto'

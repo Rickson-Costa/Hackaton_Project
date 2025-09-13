@@ -46,7 +46,12 @@ class Requisicao(models.Model):
         choices=SITUACAO_CHOICES,
         verbose_name='Situação'
     )
-    
+    def save(self, *args, **kwargs):
+        if not self.cod_requisicao:
+            # Auto-gerar código da requisição
+            ultima_req = Requisicao.objects.order_by('-cod_requisicao').first()
+            self.cod_requisicao = (ultima_req.cod_requisicao + 1) if ultima_req else 1
+        super().save(*args, **kwargs)
     class Meta:
         db_table = 'requisicao'
         verbose_name = 'Requisição'

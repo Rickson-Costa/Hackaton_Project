@@ -1,13 +1,12 @@
 from django.db import models
 from django.utils import timezone
 from decimal import Decimal
-
+from apps.projetos.models.ordem import Ordem
+# from .contrato import Contrato
 class ItemContrato(models.Model):
     '''
     Modelo alinhado com tabela itens_contrato
     '''
-    from apps.projetos.models.ordem import Ordem
-    from apps.contratos.models.contrato import Contrato
     
     SITUACAO_CHOICES = [
         ('1', 'Lançado'),

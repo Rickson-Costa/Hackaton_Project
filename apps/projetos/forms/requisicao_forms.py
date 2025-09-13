@@ -10,14 +10,12 @@ class RequisicaoForm(forms.ModelForm):
             'data_solicitacao', 
             'data_limite', 
             'valor', 
-            'situacao',
-            'prioridade'
+            'situacao'
         ]
         widgets = {
             'data_solicitacao': forms.DateInput(attrs={'type': 'date'}),
             'data_limite': forms.DateInput(attrs={'type': 'date'}),
             'situacao': forms.Select(attrs={'class': 'form-select'}),
-            'prioridade': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
