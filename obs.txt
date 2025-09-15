@@ -1,152 +1,164 @@
-# ============================================================================
-# REINÍCIO COMPLETO DO AMBIENTE DOCKER
-# ============================================================================
+# ================================
+# CONFIGURAÇÃO DO BANCO DE DADOS - SISTEMA FUNETEC
+# ================================
 
-# 1. PARAR TODOS OS CONTAINERS
-docker-compose down
-
-# 2. REMOVER CONTAINERS, VOLUMES E REDES (LIMPEZA COMPLETA)
-docker-compose down -v --remove-orphans
-
-# 3. REMOVER IMAGENS (OPCIONAL - SE QUISER REBUILD COMPLETO)
-docker-compose down --rmi all --volumes --remove-orphans
-
-# 4. LIMPAR CACHE DO DOCKER (OPCIONAL - LIMPEZA PROFUNDA)
-docker system prune -a --volumes
+# PROBLEMA: sqlite3.OperationalError: no such table: accounts_user
+# SOLUÇÃO: Criar as migrações e aplicar ao banco de dados
 
 # ============================================================================
-# RECONSTRUIR E SUBIR O AMBIENTE
+# 1. PARAR O SERVIDOR (se estiver rodando)
 # ============================================================================
 
-# 5. REBUILD DAS IMAGENS (FORÇAR RECONSTRUÇÃO)
-docker-compose build --no-cache
-
-# 6. SUBIR OS SERVIÇOS
-docker-compose up -d
-
-# 7. VERIFICAR STATUS
-docker-compose ps
+# Pressione Ctrl+C no terminal onde o servidor está rodando
 
 # ============================================================================
-# EXECUTAR MIGRAÇÕES NO CONTAINER
+# 2. VERIFICAR SE ESTAMOS NO DIRETÓRIO CORRETO
 # ============================================================================
 
-# 8. EXECUTAR MIGRAÇÕES (NO CONTAINER)
-docker-compose exec web python manage.py makemigrations
-docker-compose exec web python manage.py makemigrations projetos
-docker-compose exec web python manage.py makemigrations contratos
-docker-compose exec web python manage.py migrate
+cd C:\Users\rickson.costa\Documents\Pessoal\Sys\Hackaton_Project
 
-# 9. CRIAR SUPERUSER (SE NECESSÁRIO)
-docker-compose exec web python manage.py createsuperuser
-
-# 10. COLETAR ARQUIVOS ESTÁTICOS (SE NECESSÁRIO)
-docker-compose exec web python manage.py collectstatic --noinput
+# Deve ter o arquivo manage.py aqui
+dir manage.py
 
 # ============================================================================
-# TESTAR A APLICAÇÃO
+# 3. CRIAR MIGRAÇÕES PARA TODOS OS APPS
 # ============================================================================
 
-# 11. ACESSAR SHELL DJANGO NO CONTAINER
-docker-compose exec web python manage.py shell
+# Criar migrações para o app accounts (usuários)
+python manage.py makemigrations accounts
 
-# Dentro do shell, execute os testes:
-from apps.projetos.models import Projeto
-projeto = Projeto.objects.create(
-    cod_projeto=1,
-    nome='Teste Docker',
-    data_inicio='2022-04-18',
-    data_encerramento='2023-02-01',
-    valor=1000.00,
-    situacao='1'
-)
-print(f"✅ Projeto criado: {projeto}")
+# Criar migrações para o app projetos
+python manage.py makemigrations projetos
 
-# 12. VER LOGS (SE HOUVER PROBLEMAS)
-docker-compose logs web
-docker-compose logs db
+# Criar migrações para o app contratos
+python manage.py makemigrations contratos
+
+# Criar migrações para outros apps (se necessário)
+python manage.py makemigrations core
+python manage.py makemigrations dashboard
+python manage.py makemigrations pagamentos
+python manage.py makemigrations relatorios
 
 # ============================================================================
-# COMANDOS RÁPIDOS (ESCOLHA UMA OPÇÃO)
+# 4. APLICAR MIGRAÇÕES AO BANCO DE DADOS
 # ============================================================================
 
-# OPÇÃO A: REINÍCIO RÁPIDO (MANTÉM VOLUMES)
-docker-compose down && docker-compose up -d
-
-# OPÇÃO B: REINÍCIO COM REBUILD (MANTÉM BANCO)
-docker-compose down && docker-compose build && docker-compose up -d
-
-# OPÇÃO C: REINÍCIO COMPLETO (PERDE DADOS)
-docker-compose down -v && docker-compose build --no-cache && docker-compose up -d
-
-# OPÇÃO D: LIMPEZA TOTAL (CUIDADO - REMOVE TUDO)
-docker-compose down -v --remove-orphans --rmi all && \
-docker system prune -a --volumes -f && \
-docker-compose build --no-cache && \
-docker-compose up -d
+# Aplicar migrações padrão do Django
+python manage.py migrate
 
 # ============================================================================
-# TROUBLESHOOTING
+# 5. CRIAR SUPERUSUÁRIO
 # ============================================================================
 
-# Se o banco não subir:
-docker-compose logs db
+python manage.py createsuperuser
 
-# Se a aplicação não conectar no banco:
-docker-compose exec web ping db
-
-# Se houver erro de permissão:
-sudo chown -R $USER:$USER .
-
-# Se houver erro de porta ocupada:
-sudo netstat -tulpn | grep :8000
-# ou
-sudo lsof -i :8000
-
-# Matar processo na porta:
-sudo kill -9 $(sudo lsof -t -i:8000)
+# Quando solicitado, digite:
+# Username: admin
+# Email: admin@funetec.org.br
+# Password: admin123
+# Password (again): admin123
 
 # ============================================================================
-# VERIFICAÇÃO FINAL
+# 6. INICIAR O SERVIDOR NOVAMENTE
 # ============================================================================
 
-# 13. TESTAR APLICAÇÃO
-curl http://localhost:8000
-
-# 14. TESTAR ADMIN
-curl http://localhost:8000/admin/
-
-# 15. VERIFICAR ESTRUTURA DO BANCO
-docker-compose exec db psql -U postgres -d funetec_db -c "\dt"
-
-# Ou se usando SQLite:
-docker-compose exec web python manage.py shell
-# from django.db import connection
-# cursor = connection.cursor()
-# cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-# print(cursor.fetchall())
+python manage.py runserver
 
 # ============================================================================
-# DICAS IMPORTANTES
+# 7. TESTAR O LOGIN
 # ============================================================================
 
-"""
-⚠️  CUIDADOS:
-- docker-compose down -v REMOVE O BANCO DE DADOS
-- Use backup antes de limpeza completa
-- Verifique o docker-compose.yml antes de executar
+# Acesse: http://localhost:8000/accounts/login/
+# Login: admin
+# Senha: admin123
 
-✅ RECOMENDAÇÃO:
-- Para mudanças nos models: OPÇÃO B (build + migrate)
-- Para problemas graves: OPÇÃO C (completo)
-- Para desenvolvimento: OPÇÃO A (rápido)
+# ============================================================================
+# 8. SE HOUVER ERRO NAS MIGRAÇÕES, EXECUTE INDIVIDUALMENTE
+# ============================================================================
 
-📁 ESTRUTURA ESPERADA:
-projeto/
-├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt
-└── funetec_system/
-    ├── manage.py
-    └── apps/...
-"""
+# Se der erro, execute um app de cada vez:
+
+# Primeiro, apenas o accounts:
+python manage.py makemigrations accounts --verbosity=2
+
+# Se der erro, verifique o modelo User:
+python manage.py check accounts
+
+# Se necessário, aplique apenas migrações básicas primeiro:
+python manage.py migrate auth
+python manage.py migrate contenttypes
+python manage.py migrate sessions
+python manage.py migrate admin
+
+# Depois tente novamente:
+python manage.py makemigrations accounts
+python manage.py migrate accounts
+
+# ============================================================================
+# 9. COMANDOS DE VERIFICAÇÃO
+# ============================================================================
+
+# Verificar se as tabelas foram criadas:
+python manage.py dbshell
+.tables
+.quit
+
+# Ou verificar com Django shell:
+python manage.py shell
+>>> from apps.accounts.models import User
+>>> User.objects.count()
+>>> exit()
+
+# ============================================================================
+# 10. SOLUÇÃO DE PROBLEMAS COMUNS
+# ============================================================================
+
+# Se der erro "no such table: django_migrations":
+python manage.py migrate --run-syncdb
+
+# Se der erro de campos no User model:
+# Edite apps/accounts/models/user.py e remova campos problemáticos temporariamente
+
+# Se der erro de imports circulares:
+# Comente imports problemáticos nos __init__.py dos models
+
+# ============================================================================
+# 11. SEQUÊNCIA COMPLETA DE COMANDOS
+# ============================================================================
+
+# Execute esta sequência completa:
+cd C:\Users\rickson.costa\Documents\Pessoal\Sys\Hackaton_Project
+python manage.py check
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+
+# ============================================================================
+# 12. VERIFICAÇÃO FINAL
+# ============================================================================
+
+# Após criar o superusuário e iniciar o servidor:
+# 1. Acesse: http://localhost:8000/accounts/login/
+# 2. Login: admin / admin123
+# 3. Deve redirecionar para: http://localhost:8000/dashboard/
+# 4. Deve mostrar o dashboard do FUNETEC
+
+# Se tudo funcionou, você verá:
+# ✅ Página de login
+# ✅ Login bem-sucedido
+# ✅ Dashboard funcionando
+# ✅ Menu de navegação
+# ✅ Sistema operacional!
+
+# ============================================================================
+# 13. PRÓXIMOS PASSOS APÓS O LOGIN FUNCIONAR
+# ============================================================================
+
+# Teste estas URLs:
+# http://localhost:8000/admin/           → Interface administrativa
+# http://localhost:8000/projetos/       → Lista de projetos
+# http://localhost:8000/contratos/      → Lista de contratos
+# http://localhost:8000/accounts/profile/ → Perfil do usuário
+
+# Parabéns! O sistema estará 100% funcional! 🎉

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import projeto_views, requisicao_views, ordem_views, lancamento_views, marco_views
+from .views import projeto_views, requisicao_views, ordem_views
 
 app_name = 'projetos'
 
@@ -27,12 +27,4 @@ urlpatterns = [
     # Remover temporariamente as linhas problemáticas:
     # path('ordens/<int:pk>/iniciar/', ordem_views.OrdemIniciarView.as_view(), name='ordem_iniciar'),
     # path('ordens/<int:pk>/concluir/', ordem_views.OrdemConcluirView.as_view(), name='ordem_concluir'),
-
-    # Lançamentos de Custo
-    path('<int:projeto_pk>/lancamentos/adicionar/', lancamento_views.LancamentoCustoCreateView.as_view(), name='lancamento-create'),
-    path('lancamentos/<int:pk>/deletar/', lancamento_views.LancamentoCustoDeleteView.as_view(), name='lancamento-delete'),
-
-    # Marcos do Projeto
-    path('<int:projeto_pk>/marcos/adicionar/', marco_views.MarcoProjetoCreateView.as_view(), name='marco-create'),
-    path('marcos/<int:pk>/status/', marco_views.MarcoProjetoUpdateStatusView.as_view(), name='marco-update-status'),
 ]

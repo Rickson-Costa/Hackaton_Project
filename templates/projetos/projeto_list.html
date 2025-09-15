@@ -4,6 +4,14 @@
 
 {% block page_title %}Projetos{% endblock %}
 
+{% block page_actions %}
+    {% if perms.projetos.add_projeto %}
+        <a href="{% url 'projetos:projeto_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Novo Projeto
+        </a>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="card shadow-sm">
     <div class="card-header">
@@ -15,6 +23,7 @@
                 <thead>
                     <tr>
                         <th>Nome do Projeto</th>
+                        <th>Responsável</th>
                         <th>Situação</th>
                         <th>Valor Orçado</th>
                         <th>Data de Encerramento</th>
@@ -26,14 +35,14 @@
                     <tr>
                         <td>
                             <strong>{{ projeto.nome }}</strong><br>
-                            <small class="text-muted">#{{ projeto.cod_projeto }}</small>
+                            <small class="text-muted">#{{ projeto.codProjeto }}</small>
                         </td>
+                        <td>{{ projeto.responsavel.get_full_name|default:projeto.responsavel.username }}</td>
                         <td>
                             <span class="badge bg-primary">{{ projeto.get_situacao_display }}</span>
                         </td>
                         <td>R$ {{ projeto.valor|floatformat:2 }}</td>
-                        
-                        <td>{{ projeto.data_encerramento }}</td>
+                        <td>{{ projeto.data_encerramento|date:"d/m/Y" }}</td>
                         <td>
                             <a href="{% url 'projetos:projeto_detail' projeto.pk %}" class="btn btn-sm btn-outline-info" title="Ver Detalhes">
                                 <i class="fas fa-eye"></i>

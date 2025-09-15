@@ -89,8 +89,6 @@ body {
 /* Main content */
 main {
     padding-top: 1rem;
-    margin-left: var(--sidebar-width);
-    padding: 20px;
 }
 
 /* Cards */

@@ -4,10 +4,9 @@ from django.utils import timezone
 
 class Ordem(models.Model):
     '''
-    Modelo alinhado com tabela ordem
+    Modelo simplificado para Ordens de Serviço.
     '''
-    from .requisicao import Requisicao
-
+    
     SITUACAO_CHOICES = [
         ('1', 'Aguardando Início'),
         ('2', 'Em andamento'),
@@ -15,20 +14,19 @@ class Ordem(models.Model):
         ('4', 'Concluída'),
     ]
     
-    cod_ordem = models.IntegerField(
+    cod_ordem = models.AutoField(
         primary_key=True,
         verbose_name='Código da Ordem'
     )
     cod_requisicao = models.ForeignKey(
-        'projetos.Requisicao',  # Use string reference
-        on_delete=models.PROTECT,  # Consistente com outros models
-        db_column='codRequisicao',
+        'projetos.Requisicao',
+        on_delete=models.PROTECT,
         related_name='ordens',
         verbose_name='Requisição'
     )
     descricao = models.CharField(
         max_length=500,
-        verbose_name='Descrição'
+        verbose_name='Descrição da Ordem'
     )
     data_solicitacao = models.DateField(
         verbose_name='Data de Solicitação'
@@ -39,20 +37,50 @@ class Ordem(models.Model):
     valor = models.DecimalField(
         max_digits=14,
         decimal_places=2,
-        verbose_name='Valor'
+        verbose_name='Valor da Ordem'
     )
     situacao = models.CharField(
         max_length=20,
         choices=SITUACAO_CHOICES,
+        default='1',
         verbose_name='Situação'
     )
-    def save(self, *args, **kwargs):
-        if not self.cod_ordem:
-            # Auto-gerar código da ordem
-            ultima_ordem = Ordem.objects.order_by('-cod_ordem').first()
-            self.cod_ordem = (ultima_ordem.cod_ordem + 1) if ultima_ordem else 1
-        super().save(*args, **kwargs)
+    executante = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.PROTECT,
+        related_name='ordens_executante',
+        null=True,
+        blank=True,
+        verbose_name='Executante'
+    )
+    observacoes = models.TextField(
+        'Observações',
+        blank=True
+    )
+    
+    # Campos de auditoria básicos
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.PROTECT,
+        related_name='ordens_criadas',
+        null=True,
+        blank=True
+    )
+    
     class Meta:
-        db_table = 'ordem'
         verbose_name = 'Ordem de Serviço'
         verbose_name_plural = 'Ordens de Serviço'
+        ordering = ['-data_solicitacao']
+    
+    def __str__(self):
+        return f"OS-{self.cod_ordem}: {self.descricao[:50]}"
+    
+    def clean(self):
+        '''Validação básica'''
+        super().clean()
+        
+        if self.data_limite and self.data_solicitacao:
+            if self.data_limite < self.data_solicitacao:
+                raise ValidationError('Data limite deve ser maior que data de solicitação.')

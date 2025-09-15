@@ -1,18 +1,24 @@
 # apps/projetos/forms/projeto_forms.py
-# Código corrigido
+from django import forms
+from ..models.projeto import Projeto
 
 from django import forms
-from ..models.projeto import Projeto # Corrigindo a importação relativa
+from apps.projetos.models import Projeto
 
 class ProjetoForm(forms.ModelForm):
     class Meta:
         model = Projeto
         fields = [
             'nome',
-            'data_inicio',
-            'data_encerramento',
+            'descricao',
+            'data_inicio',        # <- aqui
+            'data_encerramento',  # <- aqui
             'valor',
             'situacao',
+            'responsavel',
+            'cliente_nome',
+            'cliente_email',
+            'cliente_telefone',
         ]
         widgets = {
             'data_inicio': forms.DateInput(attrs={'type': 'date'}),
@@ -25,6 +31,7 @@ class ProjetoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Adiciona classes do Bootstrap aos campos
         for field_name, field in self.fields.items():
             if not isinstance(field.widget, (forms.CheckboxInput, forms.Select)):
                 field.widget.attrs.update({'class': 'form-control'})

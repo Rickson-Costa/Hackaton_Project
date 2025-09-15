@@ -277,7 +277,7 @@
     <script>
         // Toggle senha
         document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordField = document.getElementById('id_password');
+            const passwordField = document.getElementById('{{ form.password.id_for_label }}');
             const toggleIcon = document.getElementById('togglePasswordIcon');
             
             if (passwordField.type === 'password') {
@@ -304,7 +304,7 @@
             
             // Remover loading se houver erro (depois de 5 segundos)
             setTimeout(function() {
-                if (form.classList.contains('loading')) {.
+                if (form.classList.contains('loading')) {
                     form.classList.remove('loading');
                     buttonText.textContent = 'Entrar';
                     button.disabled = false;
@@ -314,7 +314,7 @@
         
         // Auto-focus no primeiro campo
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('id_username').focus();
+            document.getElementById('{{ form.username.id_for_label }}').focus();
         });
         
         // Keypress Enter

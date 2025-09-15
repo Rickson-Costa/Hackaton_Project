@@ -10,11 +10,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(url='/dashboard/', permanent=False)),
     path('accounts/', include('apps.accounts.urls')),
-    path('dashboard/', include('apps.dashboard.urls')),  # Remover namespace daqui
+    path('dashboard/', include(('apps.dashboard.urls', 'dashboard'), namespace='dashboard')),
     path('projetos/', include('apps.projetos.urls')),
     path('contratos/', include('apps.contratos.urls')),
-    path('clientes/', include('apps.clientes.urls')),
     path('api/', include('apps.api.urls')),
+    # Comentar temporariamente os problemáticos:
     path('pagamentos/', include('apps.pagamentos.urls')),
     path('relatorios/', include('apps.relatorios.urls')),
 ]

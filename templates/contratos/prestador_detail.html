@@ -1,32 +1,6 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h2>Detalhes do Prestador: {{ prestador.nome }}</h2>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h4>Dados Pessoais/Empresariais</h4>
-                    <p><strong>Nome:</strong> {{ prestador.nome }}</p>
-                    <p><strong>CPF/CNPJ:</strong> {{ prestador.cpf_cnpj }}</p>
-                    <p><strong>Tipo:</strong> {{ prestador.get_tipo_pessoa_display }}</p>
-                </div>
-                <div class="col-md-6">
-                    <h4>Endereço</h4>
-                    <p>{{ prestador.logradouro }}, {{ prestador.numero }}</p>
-                    <p>{{ prestador.bairro }}, {{ prestador.cidade }} - {{ prestador.estado }}</p>
-                    <p><strong>CEP:</strong> {{ prestador.cep }}</p>
-                </div>
-            </div>
-            <!-- Adicionar mais seções e campos conforme necessário -->
-        </div>
-        <div class="card-footer">
-            <a href="#" class="btn btn-primary">Editar</a>
-            <a href="{% url 'contratos:prestador_list' %}" class="btn btn-secondary">Voltar para a lista</a>
-        </div>
-    </div>
-</div>
+  <h1>Provider Detail</h1>
+  <p>This is a placeholder for the provider detail page.</p>
 {% endblock %}

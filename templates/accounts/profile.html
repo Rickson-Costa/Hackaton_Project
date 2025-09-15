@@ -1,21 +1,54 @@
 {% extends 'base/base.html' %}
 
+{% block title %}Meu Perfil - FUNETEC{% endblock %}
+{% block page_title %}Meu Perfil{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h2>Meu Perfil</h2>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user me-2"></i>Informações do Perfil</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nome:</strong> {{ user.get_full_name|default:user.username }}</p>
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        <p><strong>Usuário:</strong> {{ user.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Função:</strong> {{ user.get_role_display }}</p>
+                        <p><strong>Último Login:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
+                        <p><strong>Membro desde:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <a href="{% url 'accounts:change_password' %}" class="btn btn-primary">
+                            <i class="fas fa-key me-1"></i>Alterar Senha
+                        </a>
+                        <a href="{% url 'dashboard:index' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Voltar ao Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <p><strong>Nome de Usuário:</strong> {{ user.username }}</p>
-            <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Papel:</strong> {{ user.get_role_display }}</p>
-            <hr>
-            <p><strong>Telefone:</strong> {{ userprofile.telefone }}</p>
-            <!-- Adicionar outros campos do userprofile aqui -->
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">Editar Perfil</a>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cog me-2"></i>Configurações</h5>
+            </div>
+            <div class="card-body">
+                <p><em>Funcionalidade de edição de perfil em desenvolvimento.</em></p>
+                <p>Em breve você poderá editar suas informações pessoais aqui.</p>
+            </div>
         </div>
     </div>
 </div>
