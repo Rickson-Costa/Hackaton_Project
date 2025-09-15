@@ -23,8 +23,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
-                <p><strong>Código:</strong> #{{ projeto.codProjeto }}</p>
-                <p><strong>Responsável:</strong> {{ projeto.responsavel.get_full_name|default:projeto.responsavel.username }}</p>
+                <p><strong>Código:</strong> #{{ projeto.cod_projeto }}</p>
                 <p><strong>Situação:</strong> <span class="badge bg-primary">{{ projeto.get_situacao_display }}</span></p>
             </div>
             <div class="col-md-6">
@@ -36,8 +35,90 @@
         
         <hr>
 
+        <h5 class="mt-4">Lançamentos de Custo</h5>
+        <a href="{% url 'projetos:lancamento-create' projeto.pk %}" class="btn btn-sm btn-outline-primary mb-3">
+            <i class="fas fa-plus me-1"></i> Adicionar Lançamento
+        </a>
+        
+        {% with lancamentos=projeto.lancamentos.all %}
+            {% if lancamentos %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Data</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lancamento in lancamentos %}
+                            <tr>
+                                <td>{{ lancamento.descricao }}</td>
+                                <td>{{ lancamento.data|date:"d/m/Y" }}</td>
+                                <td>R$ {{ lancamento.valor|floatformat:2 }}</td>
+                                <td>
+                                    <a href="{% url 'projetos:lancamento-delete' lancamento.pk %}" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">Nenhum lançamento de custo cadastrado para este projeto.</p>
+            {% endif %}
+        {% endwith %}
+
+        <hr>
+
+        <h5 class="mt-4">Marcos do Projeto</h5>
+        <a href="{% url 'projetos:marco-create' projeto.pk %}" class="btn btn-sm btn-outline-primary mb-3">
+            <i class="fas fa-plus me-1"></i> Adicionar Marco
+        </a>
+        
+        {% with marcos=projeto.marcos.all %}
+            {% if marcos %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Data Prevista</th>
+                                <th>Data Entrega</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for marco in marcos %}
+                            <tr>
+                                <td>{{ marco.descricao }}</td>
+                                <td>{{ marco.data_prevista|date:"d/m/Y" }}</td>
+                                <td>{{ marco.data_entrega|date:"d/m/Y"|default:"-" }}</td>
+                                <td>{{ marco.get_status_display }}</td>
+                                <td>
+                                    <a href="{% url 'projetos:marco-update-status' marco.pk %}" class="btn btn-info btn-sm">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">Nenhum marco cadastrado para este projeto.</p>
+            {% endif %}
+        {% endwith %}
+
+        <hr>
+
         <h5 class="mt-4">Requisições do Projeto</h5>
-        <a href="#" class="btn btn-sm btn-outline-primary mb-3">
+        <a href="{% url 'projetos:requisicao_create' projeto.pk %}" class="btn btn-sm btn-outline-primary mb-3">
             <i class="fas fa-plus me-1"></i> Adicionar Requisição
         </a>
         
@@ -46,8 +127,8 @@
                 <ul class="list-group">
                     {% for req in requisicoes %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            {{ req.descricao|truncatechars:80 }}
-                            <span class="badge bg-info rounded-pill">Ver Detalhes</span>
+                            <a href="{% url 'projetos:requisicao_detail' req.pk %}">{{ req.descricao|truncatechars:80 }}</a>
+                            <a href="{% url 'projetos:requisicao_detail' req.pk %}" class="badge bg-info rounded-pill text-decoration-none">Ver Detalhes</a>
                         </li>
                     {% endfor %}
                 </ul>

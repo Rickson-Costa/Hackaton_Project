@@ -12,7 +12,7 @@
     
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #089561 0%, #17BB94 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -21,10 +21,10 @@
         }
         
         .login-card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 35px rgba(45, 49, 66, 0.15);
             padding: 3rem;
             max-width: 400px;
             width: 100%;
@@ -37,29 +37,28 @@
         }
         
         .login-header .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
+            width: 120px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 1rem;
         }
         
-        .login-header .logo i {
-            color: white;
-            font-size: 2rem;
+        .login-header .logo img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
         }
         
         .login-header h2 {
-            color: #333;
+            color: #2D3142;
             font-weight: 300;
             margin-bottom: 0.5rem;
         }
         
         .login-header p {
-            color: #666;
+            color: #089561;
             font-size: 0.9rem;
         }
         
@@ -72,12 +71,12 @@
         }
         
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #089561;
+            box-shadow: 0 0 0 0.2rem rgba(8, 149, 97, 0.25);
         }
         
         .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #089561 0%, #17BB94 100%);
             border: none;
             border-radius: 10px;
             padding: 0.75rem 2rem;
@@ -85,16 +84,19 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.3s ease;
+            color: #FFFFFF;
         }
         
         .btn-login:hover {
+            background: linear-gradient(135deg, #076b4a 0%, #15a67d 100%);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 5px 15px rgba(8, 149, 97, 0.4);
+            color: #FFFFFF;
         }
         
         .form-check-input:checked {
-            background-color: #667eea;
-            border-color: #667eea;
+            background-color: #089561;
+            border-color: #089561;
         }
         
         .alert {
@@ -105,7 +107,7 @@
         .footer-text {
             text-align: center;
             margin-top: 2rem;
-            color: #666;
+            color: #2D3142;
             font-size: 0.8rem;
         }
         
@@ -151,7 +153,8 @@
     <div class="login-card">
         <div class="login-header">
             <div class="logo">
-                <i class="fas fa-building"></i>
+                {% load static %}
+                <img src="{% static 'img/logo_funetec.jpg' %}" alt="FUNETEC">
             </div>
             <h2>FUNETEC</h2>
             <p>Sistema de Gestão de Projetos e Contratos</p>
@@ -277,7 +280,7 @@
     <script>
         // Toggle senha
         document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+            const passwordField = document.getElementById('id_password');
             const toggleIcon = document.getElementById('togglePasswordIcon');
             
             if (passwordField.type === 'password') {
@@ -304,7 +307,7 @@
             
             // Remover loading se houver erro (depois de 5 segundos)
             setTimeout(function() {
-                if (form.classList.contains('loading')) {
+                if (form.classList.contains('loading')) {.
                     form.classList.remove('loading');
                     buttonText.textContent = 'Entrar';
                     button.disabled = false;
@@ -314,7 +317,7 @@
         
         // Auto-focus no primeiro campo
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('{{ form.username.id_for_label }}').focus();
+            document.getElementById('id_username').focus();
         });
         
         // Keypress Enter

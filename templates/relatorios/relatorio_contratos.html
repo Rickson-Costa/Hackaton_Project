@@ -1,0 +1,181 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Relatório de Contratos - FUNETEC{% endblock %}
+{% block page_title %}Relatório de Contratos{% endblock %}
+
+{% block content %}
+<!-- Resumo Estatístico -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card text-center bg-primary text-white">
+            <div class="card-body">
+                <i class="fas fa-file-contract fa-2x mb-2"></i>
+                <h5>Total</h5>
+                <h3>{{ total_contratos }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-success text-white">
+            <div class="card-body">
+                <i class="fas fa-play-circle fa-2x mb-2"></i>
+                <h5>Ativos</h5>
+                <h3>{{ contratos_ativos }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-info text-white">
+            <div class="card-body">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <h5>Concluídos</h5>
+                <h3>{{ contratos_concluidos }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-warning text-white">
+            <div class="card-body">
+                <i class="fas fa-user fa-2x mb-2"></i>
+                <h5>Pessoa Física</h5>
+                <h3>{{ contratos_pf }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-secondary text-white">
+            <div class="card-body">
+                <i class="fas fa-building fa-2x mb-2"></i>
+                <h5>Pessoa Jurídica</h5>
+                <h3>{{ contratos_pj }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center bg-dark text-white">
+            <div class="card-body">
+                <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                <h5>Valor Total</h5>
+                <h3>R$ {{ valor_total|floatformat:0 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ações -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-download me-2"></i>Exportar Relatório
+        </h5>
+        <div>
+            <a href="{% url 'relatorios:relatorio_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Voltar
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'relatorios:relatorio_contratos_generate' %}?format=pdf" class="btn btn-danger w-100">
+                    <i class="fas fa-file-pdf me-2"></i>Baixar em PDF
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'relatorios:relatorio_contratos_generate' %}?format=excel" class="btn btn-success w-100">
+                    <i class="fas fa-file-excel me-2"></i>Baixar em Excel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Contratos -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>Lista Completa de Contratos
+            <span class="badge bg-primary ms-2">{{ total_contratos }}</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if contratos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Número</th>
+                        <th>Contratado</th>
+                        <th>Descrição</th>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th>Período</th>
+                        <th>Situação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contrato in contratos %}
+                    <tr>
+                        <td><span class="fw-bold">{{ contrato.num_contrato }}</span></td>
+                        <td>
+                            <span class="fw-bold">{{ contrato.contratado|default:"Sem nome" }}</span><br>
+                            <small class="text-muted">{{ contrato.cpf_cnpj|default:"CPF/CNPJ não informado" }}</small>
+                        </td>
+                        <td>
+                            <span>{{ contrato.descricao|truncatechars:60|default:"Sem descrição" }}</span>
+                        </td>
+                        <td>
+                            {% if contrato.tipo_pessoa == 1 %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-user me-1"></i>Pessoa Física
+                            </span>
+                            {% elif contrato.tipo_pessoa == 2 %}
+                            <span class="badge bg-info">
+                                <i class="fas fa-building me-1"></i>Pessoa Jurídica
+                            </span>
+                            {% else %}
+                            <span class="badge bg-secondary">Não definido</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="fw-bold text-success">R$ {{ contrato.valor|floatformat:2 }}</span>
+                        </td>
+                        <td>
+                            <span>{{ contrato.data_inicio|date:"d/m/Y" }}</span><br>
+                            <small class="text-muted">até {{ contrato.data_fim|date:"d/m/Y" }}</small>
+                        </td>
+                        <td>
+                            {% if contrato.situacao == "1" %}
+                            <span class="badge bg-warning">Aguardando</span>
+                            {% elif contrato.situacao == "2" %}
+                            <span class="badge bg-primary">Em Andamento</span>
+                            {% elif contrato.situacao == "3" %}
+                            <span class="badge bg-secondary">Paralisado</span>
+                            {% elif contrato.situacao == "4" %}
+                            <span class="badge bg-dark">Suspenso</span>
+                            {% elif contrato.situacao == "5" %}
+                            <span class="badge bg-danger">Cancelado</span>
+                            {% elif contrato.situacao == "6" %}
+                            <span class="badge bg-success">Concluído</span>
+                            {% else %}
+                            <span class="badge bg-light text-dark">{{ contrato.get_situacao_display|default:"Indefinido" }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Nenhum contrato encontrado</h5>
+            <p class="text-muted">Não há contratos cadastrados no sistema.</p>
+            <a href="{% url 'contratos:contrato_list' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Ver Contratos
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

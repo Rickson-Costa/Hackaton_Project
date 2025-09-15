@@ -1,6 +1,208 @@
 {% extends 'base/base.html' %}
 
+{% block title %}Detalhes do Prestador - {{ prestador.nome }}{% endblock %}
+
+{% block page_title %}
+    Detalhes do Prestador
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'contratos:prestador_list' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Voltar para Lista
+</a>
+<a href="{% url 'contratos:prestador_update' prestador.pk %}" class="btn btn-primary">
+    <i class="fas fa-edit me-1"></i> Editar
+</a>
+{% endblock %}
+
 {% block content %}
-  <h1>Provider Detail</h1>
-  <p>This is a placeholder for the provider detail page.</p>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    {{ prestador.nome }}
+                    <span class="badge bg-{{ prestador.ativo|yesno:'success,secondary' }} ms-2">
+                        {{ prestador.ativo|yesno:'Ativo,Inativo' }}
+                    </span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Dados Básicos -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-user me-2"></i>Dados Básicos
+                        </h6>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Tipo de Pessoa:</strong><br>
+                        {{ prestador.get_tipo_pessoa_display }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Nome/Razão Social:</strong><br>
+                        {{ prestador.nome }}
+                    </div>
+                    {% if prestador.nome_fantasia %}
+                    <div class="col-md-12 mt-2">
+                        <strong>Nome Fantasia:</strong><br>
+                        {{ prestador.nome_fantasia }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Documentos -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-id-card me-2"></i>Documentos
+                        </h6>
+                    </div>
+                    {% if prestador.cpf %}
+                    <div class="col-md-4">
+                        <strong>CPF:</strong><br>
+                        {{ prestador.cpf }}
+                    </div>
+                    {% endif %}
+                    {% if prestador.cnpj %}
+                    <div class="col-md-4">
+                        <strong>CNPJ:</strong><br>
+                        {{ prestador.cnpj }}
+                    </div>
+                    {% endif %}
+                    {% if prestador.rg %}
+                    <div class="col-md-4">
+                        <strong>RG:</strong><br>
+                        {{ prestador.rg }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Contato -->
+                {% if prestador.email or prestador.telefone %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-envelope me-2"></i>Contato
+                        </h6>
+                    </div>
+                    {% if prestador.email %}
+                    <div class="col-md-6">
+                        <strong>Email:</strong><br>
+                        <a href="mailto:{{ prestador.email }}">{{ prestador.email }}</a>
+                    </div>
+                    {% endif %}
+                    {% if prestador.telefone %}
+                    <div class="col-md-6">
+                        <strong>Telefone:</strong><br>
+                        <a href="tel:{{ prestador.telefone }}">{{ prestador.telefone }}</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Endereço -->
+                {% if prestador.cep or prestador.logradouro %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>Endereço
+                        </h6>
+                    </div>
+                    <div class="col-md-12">
+                        <address>
+                            {% if prestador.logradouro %}{{ prestador.logradouro }}{% endif %}
+                            {% if prestador.numero %}, {{ prestador.numero }}{% endif %}
+                            {% if prestador.complemento %} - {{ prestador.complemento }}{% endif %}<br>
+                            {% if prestador.bairro %}{{ prestador.bairro }} - {% endif %}
+                            {% if prestador.cidade %}{{ prestador.cidade }}/{% endif %}{{ prestador.uf|default:"" }}<br>
+                            {% if prestador.cep %}CEP: {{ prestador.cep }}{% endif %}
+                        </address>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Dados Bancários -->
+                {% if prestador.banco or prestador.agencia or prestador.conta %}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h6 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-university me-2"></i>Dados Bancários
+                        </h6>
+                    </div>
+                    {% if prestador.banco %}
+                    <div class="col-md-3">
+                        <strong>Banco:</strong><br>
+                        {{ prestador.banco }}
+                    </div>
+                    {% endif %}
+                    {% if prestador.agencia %}
+                    <div class="col-md-3">
+                        <strong>Agência:</strong><br>
+                        {{ prestador.agencia }}
+                    </div>
+                    {% endif %}
+                    {% if prestador.conta %}
+                    <div class="col-md-3">
+                        <strong>Conta:</strong><br>
+                        {{ prestador.conta }}
+                    </div>
+                    {% endif %}
+                    {% if prestador.tipo_conta %}
+                    <div class="col-md-3">
+                        <strong>Tipo de Conta:</strong><br>
+                        {{ prestador.tipo_conta }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Informações Adicionais -->
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Informações
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <small class="text-muted">ID do Prestador</small><br>
+                    <code>{{ prestador.pk }}</code>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Tipo de Pessoa</small><br>
+                    <span class="badge bg-info">
+                        {{ prestador.get_tipo_pessoa_display }}
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <small class="text-muted">Status</small><br>
+                    <span class="badge bg-{{ prestador.ativo|yesno:'success,secondary' }}">
+                        {{ prestador.ativo|yesno:'Ativo,Inativo' }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contratos Relacionados (Futuro) -->
+        <div class="card shadow-sm mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-file-contract me-2"></i>Contratos
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Listagem de contratos será implementada em breve.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

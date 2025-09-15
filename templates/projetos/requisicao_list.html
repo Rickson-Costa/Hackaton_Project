@@ -1,6 +1,38 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-  <h1>Requisition List</h1>
-  <p>This is a placeholder for the requisition list page.</p>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>Requisições do Projeto: {{ projeto.nome }}</h2>
+            <a href="#" class="btn btn-success">Nova Requisição</a>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Descrição</th>
+                        <th>Status</th>
+                        <th>Data de Solicitação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requisicoes %}
+                    <tr>
+                        <td>{{ req.numero }}</td>
+                        <td>{{ req.descricao|truncatewords:10 }}</td>
+                        <td><span class="badge bg-secondary">{{ req.get_status_display }}</span></td>
+                        <td>{{ req.data_solicitacao|date:"d/m/Y" }}</td>
+                        <td>
+                            <a href="#" class="btn btn-info btn-sm">Ver Detalhes</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}

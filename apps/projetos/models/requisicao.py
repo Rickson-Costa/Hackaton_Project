@@ -3,8 +3,9 @@ from django.core.exceptions import ValidationError
 
 class Requisicao(models.Model):
     '''
-    Modelo simplificado para Requisições.
+    Modelo alinhado com tabela requisicao
     '''
+    from .projeto import Projeto
     
     SITUACAO_CHOICES = [
         ('1', 'Aguardando Início'),
@@ -14,72 +15,45 @@ class Requisicao(models.Model):
         ('5', 'Concluída'),
     ]
     
-    cod_requisicao = models.AutoField(
+    cod_requisicao = models.IntegerField(
         primary_key=True,
+        db_column='codRequisicao',
         verbose_name='Código da Requisição'
     )
     cod_projeto = models.ForeignKey(
         'projetos.Projeto',
         on_delete=models.PROTECT,
+        db_column='codProjeto',
         related_name='requisicoes',
         verbose_name='Projeto'
     )
     descricao = models.CharField(
         max_length=500,
-        verbose_name='Descrição da Requisição'
+        verbose_name='Descrição'
     )
     data_solicitacao = models.DateField(
+        db_column='dataSolicitacao',
         verbose_name='Data de Solicitação'
     )
     data_limite = models.DateField(
+        db_column='dataLimite',
         verbose_name='Data Limite'
     )
     valor = models.DecimalField(
         max_digits=14,
         decimal_places=2,
-        verbose_name='Valor da Requisição'
+        verbose_name='Valor'
     )
     situacao = models.CharField(
         max_length=20,
         choices=SITUACAO_CHOICES,
-        default='1',
         verbose_name='Situação'
-    )
-    prioridade = models.CharField(
-        'Prioridade',
-        max_length=10,
-        choices=[
-            ('baixa', 'Baixa'),
-            ('normal', 'Normal'),
-            ('alta', 'Alta'),
-            ('critica', 'Crítica'),
-        ],
-        default='normal'
-    )
-    
-    # Campos de auditoria básicos
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        'accounts.User',
-        on_delete=models.PROTECT,
-        related_name='requisicoes_criadas',
-        null=True,
-        blank=True
     )
     
     class Meta:
+        db_table = 'requisicao'
         verbose_name = 'Requisição'
         verbose_name_plural = 'Requisições'
-        ordering = ['-data_solicitacao']
     
     def __str__(self):
-        return f"REQ-{self.cod_requisicao}: {self.descricao[:50]}"
-    
-    def clean(self):
-        '''Validação básica'''
-        super().clean()
-        
-        if self.data_limite and self.data_solicitacao:
-            if self.data_limite < self.data_solicitacao:
-                raise ValidationError('Data limite deve ser maior que data de solicitação.')
+        return f"Req {self.cod_requisicao} - {self.descricao[:50]}"

@@ -10,6 +10,7 @@ class BaseSystem {
         this.setupConfirmations();
         this.setupFormValidations();
         this.setupAjaxSetup();
+        this.setupSidebarToggle();
     }
     
     setupTooltips() {
@@ -57,6 +58,58 @@ class BaseSystem {
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         if (csrfToken) {
             window.csrfToken = csrfToken;
+        }
+    }
+    
+    setupSidebarToggle() {
+        // Funcionalidade de toggle do sidebar
+        const toggleButton = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebarMenu');
+        const body = document.body;
+        
+        if (toggleButton && sidebar) {
+            // Verifica se há estado salvo no localStorage
+            const sidebarState = localStorage.getItem('sidebarCollapsed');
+            if (sidebarState === 'true') {
+                sidebar.classList.add('collapsed');
+                body.classList.add('sidebar-collapsed');
+                this.updateToggleIcon(toggleButton, true);
+            }
+            
+            toggleButton.addEventListener('click', () => {
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                
+                if (isCollapsed) {
+                    // Expandir sidebar
+                    sidebar.classList.remove('collapsed');
+                    body.classList.remove('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'false');
+                    this.updateToggleIcon(toggleButton, false);
+                } else {
+                    // Colapsar sidebar
+                    sidebar.classList.add('collapsed');
+                    body.classList.add('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', 'true');
+                    this.updateToggleIcon(toggleButton, true);
+                }
+            });
+        }
+    }
+    
+    updateToggleIcon(button, isCollapsed) {
+        const icon = button.querySelector('i');
+        if (icon) {
+            if (isCollapsed) {
+                icon.className = 'fas fa-chevron-right';
+                button.title = 'Expandir Menu';
+                button.setAttribute('aria-pressed', 'true');
+                button.setAttribute('aria-label', 'Expandir menu lateral');
+            } else {
+                icon.className = 'fas fa-bars';
+                button.title = 'Recolher Menu';
+                button.setAttribute('aria-pressed', 'false');
+                button.setAttribute('aria-label', 'Recolher menu lateral');
+            }
         }
     }
     

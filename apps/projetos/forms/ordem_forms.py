@@ -6,18 +6,18 @@ class OrdemForm(forms.ModelForm):
     class Meta:
         model = Ordem
         fields = [
+            'cod_ordem',
+            'cod_requisicao',
             'descricao', 
             'data_solicitacao', 
             'data_limite', 
             'valor', 
-            'situacao',
-            'executante'
+            'situacao'
         ]
         widgets = {
             'data_solicitacao': forms.DateInput(attrs={'type': 'date'}),
             'data_limite': forms.DateInput(attrs={'type': 'date'}),
             'situacao': forms.Select(attrs={'class': 'form-select'}),
-            'executante': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):

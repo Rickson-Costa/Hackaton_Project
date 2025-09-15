@@ -50,8 +50,8 @@ class UserProfile(models.Model):
     notificar_email = models.BooleanField('Notificar por Email', default=True)
     notificar_sistema = models.BooleanField('Notificar no Sistema', default=True)
 
-    # Foto
-    avatar = models.ImageField('Foto do Perfil', upload_to='avatars/', null=True, blank=True)
+    # Foto (temporarily using FileField instead of ImageField)
+    avatar = models.FileField('Foto do Perfil', upload_to='avatars/', null=True, blank=True)
 
     class Meta:
         verbose_name = 'Perfil de Usuário'

@@ -3,16 +3,61 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
-from ..models.contrato import Contrato, Prestador
-from ..forms.contrato_forms import ContratoForm
+from ..models.contrato import Contrato
+from ..models.prestador import Prestador
+from ..forms.contrato_forms import ContratoForm, PrestadorForm
 from apps.projetos.models.ordem import Ordem
-from ..models.item_contrato import ItemContrato
+
 
 class ContratoListView(LoginRequiredMixin, ListView):
     model = Contrato
     template_name = 'contratos/contrato_list.html'
     context_object_name = 'contratos'
     paginate_by = 10
+    ordering = ['-data_inicio', 'num_contrato']  # Fix UnorderedObjectListWarning
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Filtro por tipo de pessoa (PF/PJ)
+        tipo_pessoa = self.request.GET.get('tipo_pessoa')
+        if tipo_pessoa:
+            queryset = queryset.filter(tipo_pessoa=tipo_pessoa)
+        
+        # Filtro por inadimplência
+        inadimplencia = self.request.GET.get('inadimplencia')
+        if inadimplencia == 'true':
+            # Filtra contratos com parcelas vencidas
+            from ..models.item_contrato import ItemContrato
+            from django.utils import timezone
+            
+            contratos_inadimplentes = ItemContrato.objects.filter(
+                situacao='1',  # Pendente
+                data_vencimento__lt=timezone.now().date()
+            ).values_list('num_contrato', flat=True)
+            
+            queryset = queryset.filter(num_contrato__in=contratos_inadimplentes)
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Adiciona informações sobre filtros ativos
+        context['tipo_pessoa_filtro'] = self.request.GET.get('tipo_pessoa')
+        context['inadimplencia_filtro'] = self.request.GET.get('inadimplencia')
+        
+        # Labels para os filtros
+        if context['tipo_pessoa_filtro'] == '1':
+            context['filtro_label'] = 'Contratos Pessoa Física (PF)'
+        elif context['tipo_pessoa_filtro'] == '2':
+            context['filtro_label'] = 'Contratos Pessoa Jurídica (PJ)'
+        elif context['inadimplencia_filtro'] == 'true':
+            context['filtro_label'] = 'Contratos em Inadimplência'
+        else:
+            context['filtro_label'] = 'Todos os Contratos'
+            
+        return context
 
 class ContratoDetailView(LoginRequiredMixin, DetailView):
     model = Contrato
@@ -57,19 +102,36 @@ class ContratoUpdateView(LoginRequiredMixin, UpdateView):
     
 
 
+# Temporarily commented out until Prestador model is created
 class PrestadorListView(LoginRequiredMixin, ListView):
     model = Prestador
     template_name = 'contratos/prestador_list.html'
     context_object_name = 'prestadores'
     paginate_by = 10
 
-class ParcelaListView(LoginRequiredMixin, ListView):
-    model = ItemContrato
-    template_name = 'contratos/parcela_list.html'
-    context_object_name = 'parcelas'
-    paginate_by = 15
+class PrestadorCreateView(LoginRequiredMixin, CreateView):
+    model = Prestador
+    form_class = PrestadorForm
+    template_name = 'contratos/prestador_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('contratos:prestador_list')
 
-    def get_queryset(self):
-        # Apenas um exemplo para listar todas as parcelas.
-        # Pode ser filtrado por status, data, etc. no futuro.
-        return ItemContrato.objects.select_related('num_contrato').all().order_by('data_vencimento')
+class PrestadorUpdateView(LoginRequiredMixin, UpdateView):
+    model = Prestador
+    form_class = PrestadorForm
+    template_name = 'contratos/prestador_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('contratos:prestador_detail', kwargs={'pk': self.object.pk})
+
+class PrestadorDetailView(LoginRequiredMixin, DetailView):
+    model = Prestador
+    template_name = 'contratos/prestador_detail.html'
+    context_object_name = 'prestador'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        prestador = self.get_object()
+        # context['contratos'] = Contrato.objects.filter(cpf_cnpj=prestador.cpf_cnpj)  # Temporarily disabled
+        return context

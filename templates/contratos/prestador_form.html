@@ -1,0 +1,225 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Editar Prestador{% else %}Novo Prestador{% endif %}{% endblock %}
+
+{% block page_title %}
+    {% if object %}Editar Prestador{% else %}Cadastrar Novo Prestador{% endif %}
+{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'contratos:prestador_list' %}" class="btn btn-secondary">
+    <i class="fas fa-arrow-left me-1"></i> Voltar para Lista
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>
+                    {% if object %}Editar Prestador{% else %}Dados do Prestador{% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Dados Básicos -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-user me-2"></i>Dados Básicos
+                            </h6>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.tipo_pessoa|as_crispy_field }}
+                        </div>
+                        <div class="col-md-8">
+                            {{ form.nome|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.nome_fantasia|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <!-- Documentos -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-id-card me-2"></i>Documentos
+                            </h6>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.cpf|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.cnpj|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.rg|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.inscricao_estadual|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.inscricao_municipal|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <!-- Contato -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-envelope me-2"></i>Contato
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.email|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.telefone|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <!-- Endereço -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-map-marker-alt me-2"></i>Endereço
+                            </h6>
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.cep|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.logradouro|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.numero|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.complemento|as_crispy_field }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.bairro|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.cidade|as_crispy_field }}
+                        </div>
+                        <div class="col-md-1">
+                            {{ form.uf|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <!-- Dados Bancários -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-university me-2"></i>Dados Bancários
+                            </h6>
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.banco|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.agencia|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.conta|as_crispy_field }}
+                        </div>
+                        <div class="col-md-2">
+                            {{ form.tipo_conta|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    <!-- Configurações -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="border-bottom pb-2 mb-3">
+                                <i class="fas fa-cogs me-2"></i>Configurações
+                            </h6>
+                        </div>
+                        <div class="col-md-12">
+                            {{ form.observacoes|as_crispy_field }}
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check">
+                                {{ form.ativo }}
+                                <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                                    {{ form.ativo.label }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="row">
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{% url 'contratos:prestador_list' %}" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-times me-1"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>
+                                    {% if object %}Atualizar{% else %}Cadastrar{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tipoPessoaField = document.getElementById('id_tipo_pessoa');
+    const cpfField = document.getElementById('id_cpf').closest('.form-group');
+    const cnpjField = document.getElementById('id_cnpj').closest('.form-group');
+    const rgField = document.getElementById('id_rg').closest('.form-group');
+    const nomeFantasiaField = document.getElementById('id_nome_fantasia').closest('.form-group');
+    const inscricaoEstadualField = document.getElementById('id_inscricao_estadual').closest('.form-group');
+    const inscricaoMunicipalField = document.getElementById('id_inscricao_municipal').closest('.form-group');
+
+    function toggleFields() {
+        const tipoPessoa = tipoPessoaField.value;
+        
+        if (tipoPessoa === 'PF') {
+            // Mostrar campos para Pessoa Física
+            cpfField.style.display = 'block';
+            rgField.style.display = 'block';
+            
+            // Ocultar campos para Pessoa Jurídica
+            cnpjField.style.display = 'none';
+            nomeFantasiaField.style.display = 'none';
+            inscricaoEstadualField.style.display = 'none';
+            inscricaoMunicipalField.style.display = 'none';
+            
+        } else if (tipoPessoa === 'PJ') {
+            // Mostrar campos para Pessoa Jurídica
+            cnpjField.style.display = 'block';
+            nomeFantasiaField.style.display = 'block';
+            inscricaoEstadualField.style.display = 'block';
+            inscricaoMunicipalField.style.display = 'block';
+            
+            // Ocultar campos para Pessoa Física
+            cpfField.style.display = 'none';
+            rgField.style.display = 'none';
+        }
+    }
+
+    // Executar no carregamento da página
+    toggleFields();
+    
+    // Executar quando o tipo de pessoa mudar
+    tipoPessoaField.addEventListener('change', toggleFields);
+});
+</script>
+{% endblock %}

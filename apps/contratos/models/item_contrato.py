@@ -4,8 +4,10 @@ from decimal import Decimal
 
 class ItemContrato(models.Model):
     '''
-    Modelo simplificado para Itens do Contrato (Parcelas).
+    Modelo alinhado com tabela itens_contrato
     '''
+    from apps.projetos.models.ordem import Ordem
+    from apps.contratos.models.contrato import Contrato
     
     SITUACAO_CHOICES = [
         ('1', 'Lançado'),
@@ -14,10 +16,10 @@ class ItemContrato(models.Model):
     ]
     
     num_contrato = models.ForeignKey(
-        'contratos.Contrato',
+        'contratos.Contrato',  # Use string reference
         on_delete=models.CASCADE,
-        related_name='itens',
-        verbose_name='Contrato'
+        db_column='numContrato',
+        related_name='itens'  # Mudei de 'itens_contrato' para 'itens'
     )
     cod_lancamento = models.IntegerField(
         verbose_name='Código do Lançamento'
@@ -43,40 +45,27 @@ class ItemContrato(models.Model):
         verbose_name='Valor Pago'
     )
     data_pagamento = models.DateField(
-        verbose_name='Data de Pagamento',
         null=True,
-        blank=True
+        blank=True,
+        verbose_name='Data de Pagamento'
     )
     situacao = models.CharField(
         max_length=20,
         choices=SITUACAO_CHOICES,
-        default='1',
         verbose_name='Situação'
     )
-    observacoes = models.TextField(
-        'Observações',
-        blank=True
-    )
-    
-    # Campos de auditoria básicos
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
+    def get_valor_pendente(self):
+        """Retorna valor pendente da parcela"""
+        return self.valor_parcela - self.valor_pago
+
+    def get_valor_total(self):
+        """Retorna valor total da parcela"""
+        return self.valor_parcela
+
+    def __str__(self):
+        return f"Parcela {self.num_parcela} - {self.num_contrato}"
     class Meta:
+        db_table = 'itens_contrato'
         verbose_name = 'Item do Contrato'
         verbose_name_plural = 'Itens do Contrato'
-        ordering = ['num_parcela']
         unique_together = [['num_contrato', 'cod_lancamento']]
-    
-    def __str__(self):
-        return f"Parcela {self.num_parcela} - {self.num_contrato.num_contrato}"
-    
-    def get_valor_pendente(self):
-        '''Calcular valor pendente de pagamento'''
-        return max(Decimal('0'), self.valor_parcela - self.valor_pago)
-    
-    def is_vencida(self):
-        '''Verificar se parcela está vencida'''
-        if self.situacao == '3':  # Liquidada
-            return False
-        return timezone.now().date() > self.data_vencimento

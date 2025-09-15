@@ -1,52 +1,69 @@
 {% extends 'base/base.html' %}
 
-{% block title %}Lista de Parcelas - FUNETEC{% endblock %}
-{% block page_title %}Todas as Parcelas{% endblock %}
-
 {% block content %}
-<div class="card shadow-sm">
-    <div class="card-header">
-        <h5 class="mb-0">Lista de Parcelas</h5>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>Todas as Parcelas</h3>
+            <a href="{% url 'contratos:contrato_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Voltar aos Contratos
+            </a>
+        </div>
+        <div class="card-body">
+            {% if parcelas %}
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Contrato</th>
                         <th>Nº da Parcela</th>
-                        <th>Vencimento</th>
-                        <th>Valor</th>
-                        <th>Situação</th>
+                        <th>Data de Vencimento</th>
+                        <th>Valor Previsto</th>
+                        <th>Valor Pago</th>
+                        <th>Status</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for parcela in parcelas %}
                     <tr>
                         <td>
-                            <a href="{% url 'contratos:contrato_detail' parcela.num_contrato.pk %}">
+                            <a href="{% url 'contratos:contrato_detail' parcela.num_contrato.pk %}" class="text-decoration-none">
                                 {{ parcela.num_contrato.num_contrato }}
                             </a>
                         </td>
-                        <td>{{ parcela.num_parcela }}</td>
+                        <td>{{ parcela.cod_lancamento }}</td>
                         <td>{{ parcela.data_vencimento|date:"d/m/Y" }}</td>
-                        <td>R$ {{ parcela.valor_parcela|floatformat:2 }}</td>
+                        <td>R$ {{ parcela.valor_previsto|floatformat:2 }}</td>
+                        <td>R$ {{ parcela.valor_pago|default:"0.00"|floatformat:2 }}</td>
                         <td>
-                            {% if parcela.is_vencida %}
-                                <span class="badge bg-danger">Vencida</span>
+                            <span class="badge bg-{% if parcela.valor_pago %}success{% else %}warning{% endif %}">
+                                {% if parcela.valor_pago %}Pago{% else %}Pendente{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            {% if not parcela.valor_pago %}
+                            <a href="{% url 'contratos:registrar-pagamento' parcela.pk %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-money-bill me-1"></i>Registrar Pagamento
+                            </a>
                             {% else %}
-                                <span class="badge bg-info">{{ parcela.get_situacao_display }}</span>
+                            <span class="text-success">
+                                <i class="fas fa-check-circle me-1"></i>Pago
+                            </span>
                             {% endif %}
                         </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">Nenhuma parcela encontrada.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Nenhuma parcela encontrada</h5>
+                <p class="text-muted">Não há parcelas cadastradas no sistema.</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
 {% endblock %}

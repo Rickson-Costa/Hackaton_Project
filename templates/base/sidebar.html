@@ -1,26 +1,155 @@
+<!-- templates/base/sidebar.html -->
 <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
     <div class="position-sticky pt-3">
+        <!-- Dashboard -->
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link active" href="{% url 'dashboard:index' %}">
+                <a class="nav-link {% if 'dashboard' in request.resolver_match.url_name %}active{% endif %}" 
+                   href="{% url 'dashboard:index' %}">
                     <i class="fas fa-tachometer-alt me-2"></i>
-                    Dashboard
+                    <span>Dashboard</span>
                 </a>
             </li>
-            {% if user.is_authenticated %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'projetos:projeto_list' %}">
-                    <i class="fas fa-project-diagram me-2"></i>
-                    Projetos
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'contratos:contrato_list' %}">
-                    <i class="fas fa-file-contract me-2"></i>
-                    Contratos
-                </a>
-            </li>
+        </ul>
+        
+        <!-- Projetos -->
+        {% if user.can_manage_projects or user.is_cliente %}
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                <span>Projetos</span>
+            </h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if 'projeto' in request.resolver_match.url_name %}active{% endif %}" 
+                       href="{% url 'projetos:projeto_list' %}">
+                        <i class="fas fa-list me-2"></i>
+                        <span>Listar Projetos</span>
+                    </a>
+                </li>
+                {% if user.can_manage_projects %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'projetos:projeto_create' %}">
+                            <i class="fas fa-plus me-2"></i>
+                            <span>Novo Projeto</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        {% endif %}
+        
+        <!-- Contratos -->
+        {% if user.can_manage_contracts %}
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                <span>Contratos</span>
+            </h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if 'contrato' in request.resolver_match.url_name %}active{% endif %}" 
+                       href="{% url 'contratos:contrato_list' %}">
+                        <i class="fas fa-file-contract me-2"></i>
+                        <span>Contratos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contratos:prestador_list' %}">
+                        <i class="fas fa-users me-2"></i>
+                        <span>Prestadores</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contratos:parcela_list' %}">
+                        <i class="fas fa-money-bill-wave me-2"></i>
+                        <span>Parcelas</span>
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
+        
+        <!-- Clientes -->
+        {% if user.can_manage_contracts %}
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                <span>Clientes</span>
+            </h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link {% if 'cliente' in request.resolver_match.url_name %}active{% endif %}" 
+                       href="{% url 'clientes:cliente-list' %}">
+                        <i class="fas fa-users me-2"></i>
+                        <span>Listar Clientes</span>
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
+        
+        <!-- Financeiro -->
+        {% if user.can_view_financial_data %}
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                <span>Financeiro</span>
+            </h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:analytics_financeiro' %}">
+                        <i class="fas fa-chart-line me-2"></i>
+                        <span>Analytics</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'pagamentos:payment_history' %}">
+                        <i class="fas fa-credit-card me-2"></i>
+                        <span>Pagamentos</span>
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
+        
+        <!-- Relatórios -->
+        {% if user.can_generate_reports %}
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                <span>Relatórios</span>
+            </h6>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'relatorios:relatorio_list' %}">
+                        <i class="fas fa-file-alt me-2"></i>
+                        <span>Relatórios</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'relatorios:relatorio_custom' %}">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        <span>Relatório Customizado</span>
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
+        
+        <!-- Analytics -->
+        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Analytics</span>
+        </h6>
+        <ul class="nav flex-column">
+            {% if user.can_manage_projects %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:analytics_projetos' %}">
+                        <i class="fas fa-project-diagram me-2"></i>
+                        <span>Projetos</span>
+                    </a>
+                </li>
+            {% endif %}
+            {% if user.can_view_financial_data %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard:analytics_contratos' %}">
+                        <i class="fas fa-handshake me-2"></i>
+                        <span>Contratos</span>
+                    </a>
+                </li>
             {% endif %}
         </ul>
+        
+        <!-- Alertas -->
+        <div class="mt-4">
+            <div id="sidebar-alerts" class="px-3">
+                <!-- Carregado via AJAX -->
+            </div>
+        </div>
     </div>
 </nav>

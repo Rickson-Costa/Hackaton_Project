@@ -23,7 +23,7 @@
                 <thead>
                     <tr>
                         <th>Nome do Projeto</th>
-                        <th>Responsável</th>
+                        <th>Código</th>
                         <th>Situação</th>
                         <th>Valor Orçado</th>
                         <th>Data de Encerramento</th>
@@ -34,10 +34,9 @@
                     {% for projeto in projetos %}
                     <tr>
                         <td>
-                            <strong>{{ projeto.nome }}</strong><br>
-                            <small class="text-muted">#{{ projeto.codProjeto }}</small>
+                            <strong>{{ projeto.nome }}</strong>
                         </td>
-                        <td>{{ projeto.responsavel.get_full_name|default:projeto.responsavel.username }}</td>
+                        <td>#{{ projeto.cod_projeto }}</td>
                         <td>
                             <span class="badge bg-primary">{{ projeto.get_situacao_display }}</span>
                         </td>

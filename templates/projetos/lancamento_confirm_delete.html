@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Confirmar Deleção{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Confirmar Deleção</h1>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <p>Você tem certeza que deseja deletar o lançamento "{{ object }}"?</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Confirmar</button>
+                <a href="{% url 'projetos:projeto-detail' object.projeto.pk %}" class="btn btn-secondary">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

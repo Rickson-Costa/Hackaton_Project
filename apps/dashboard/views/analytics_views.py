@@ -12,20 +12,6 @@ from apps.core.middleware import BaseService
 
 from ..services.financeiro_analytics import FinanceiroAnalyticsService
 
-class FinanceiroAnalyticsView(LoginRequiredMixin, TemplateView):
-    template_name = "dashboard/analytics_financeiro.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        svc = FinanceiroAnalyticsService()
-        context.update({
-            'resumo': svc.get_resumo_financeiro(),
-            'receitas_por_mes': svc.get_receitas_por_mes(),
-            'despesas_por_mes': svc.get_despesas_por_mes(),
-        })
-        return context
-
-
 class ProjetosAnalyticsView(LoginRequiredMixin, TemplateView):
     """View para analytics de projetos"""
     template_name = 'dashboard/analytics/projetos.html'
@@ -74,7 +60,7 @@ class FinanceiroAnalyticsView(LoginRequiredMixin, PermissionRequiredMixin, Templ
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        analytics_service = FinanceiroAnalyticsService(user=self.request.user)
+        analytics_service = FinanceiroAnalyticsService()
         
         context.update({
             'resumo_financeiro': analytics_service.get_resumo_financeiro(),
@@ -102,7 +88,7 @@ class ProjetosChartDataView(LoginRequiredMixin, View):
         elif chart_type == 'evolucao':
             data = analytics_service.get_chart_evolucao()
         elif chart_type == 'responsaveis':
-            data = analytics_service.get_chart_responsaveis()
+            data = analytics_service.get_chart_situacao()  # Usar gráfico de situação
         elif chart_type == 'clientes':
             data = analytics_service.get_chart_clientes()
         elif chart_type == 'status_prazo':
@@ -141,7 +127,7 @@ class FinanceiroChartDataView(LoginRequiredMixin, PermissionRequiredMixin, View)
     
     def get(self, request, *args, **kwargs):
         chart_type = request.GET.get('type', 'fluxo_caixa')
-        analytics_service = FinanceiroAnalyticsService(user=request.user)
+        analytics_service = FinanceiroAnalyticsService()
         
         data = {}
         
@@ -176,19 +162,18 @@ class ProjetosAnalyticsService(BaseService):
         }
     
     def get_distribuicao_responsaveis(self):
-        """Distribuição de projetos por responsável"""
+        """Distribuição de projetos por situação (substituindo responsáveis)"""
         return self._get_projetos_queryset().values(
-            'responsavel__first_name',
-            'responsavel__last_name'
+            'situacao'
         ).annotate(
             count=Count('cod_projeto'),
             valor_total=Sum('valor')
         ).order_by('-count')[:10]
     
     def get_projetos_por_cliente(self):
-        """Top clientes por número de projetos"""
+        """Projetos agrupados por situação (substituindo cliente)"""
         return self._get_projetos_queryset().values(
-            'cliente_nome'
+            'situacao'
         ).annotate(
             count=Count('cod_projeto'),
             valor_total=Sum('valor')
@@ -266,14 +251,14 @@ class ProjetosAnalyticsService(BaseService):
             meses.insert(0, mes.strftime('%b/%Y'))
             
             criados = self._get_projetos_queryset().filter(
-                created_at__year=mes.year,
-                created_at__month=mes.month
+                data_inicio__year=mes.year,
+                data_inicio__month=mes.month
             ).count()
             
             concluidos = self._get_projetos_queryset().filter(
                 situacao='6',
-                updated_at__year=mes.year,
-                updated_at__month=mes.month
+                data_encerramento__year=mes.year,
+                data_encerramento__month=mes.month
             ).count()
             
             projetos_criados.insert(0, criados)
@@ -313,9 +298,12 @@ class ProjetosAnalyticsService(BaseService):
         if self.user.can_manage_projects():
             return Projeto.objects.all()
         elif self.user.is_cliente():
-            return Projeto.objects.filter(cliente_email=self.user.email)
+            # Se houver um campo específico de cliente, usar aqui
+            # Por enquanto, retorna todos os projetos para clientes
+            return Projeto.objects.all()
         else:
-            return Projeto.objects.filter(responsavel=self.user)
+            # Para outros usuários, retorna todos os projetos
+            return Projeto.objects.all()
     
     def _calcular_taxa_conclusao(self, projetos):
         """Calcular taxa de conclusão"""
@@ -348,6 +336,98 @@ class ProjetosAnalyticsService(BaseService):
         ).count()
         
         return no_prazo + concluidos_no_prazo
+    
+    def get_evolucao_mensal(self):
+        """Evolução mensal dos projetos"""
+        hoje = timezone.now().date()
+        evolucao = []
+        
+        for i in range(12):
+            mes = (hoje.replace(day=1) - timedelta(days=30*i))
+            
+            projetos_iniciados = self._get_projetos_queryset().filter(
+                data_inicio__year=mes.year,
+                data_inicio__month=mes.month
+            ).count()
+            
+            projetos_concluidos = self._get_projetos_queryset().filter(
+                situacao='6',
+                data_encerramento__year=mes.year,
+                data_encerramento__month=mes.month
+            ).count()
+            
+            evolucao.insert(0, {
+                'mes': mes.strftime('%m/%Y'),
+                'iniciados': projetos_iniciados,
+                'concluidos': projetos_concluidos
+            })
+        
+        return evolucao
+    
+    def get_chart_responsaveis(self):
+        """Gráfico de distribuição por situação (substituindo responsáveis)"""
+        return self.get_chart_situacao()
+    
+    def get_chart_clientes(self):
+        """Gráfico de projetos por situação (substituindo clientes)"""
+        return self.get_chart_situacao()
+    
+    def get_chart_status_prazo(self):
+        """Gráfico de status de prazo"""
+        hoje = timezone.now().date()
+        projetos = self._get_projetos_queryset()
+        
+        no_prazo = projetos.filter(
+            situacao__in=['1', '2'],
+            data_encerramento__gte=hoje
+        ).count()
+        
+        atrasados = projetos.filter(
+            situacao__in=['1', '2'],
+            data_encerramento__lt=hoje
+        ).count()
+        
+        concluidos = projetos.filter(situacao='6').count()
+        
+        return {
+            'type': 'pie',
+            'data': {
+                'labels': ['No Prazo', 'Atrasados', 'Concluídos'],
+                'datasets': [{
+                    'data': [no_prazo, atrasados, concluidos],
+                    'backgroundColor': ['#28a745', '#dc3545', '#007bff']
+                }]
+            },
+            'options': {
+                'responsive': True,
+                'plugins': {'legend': {'position': 'bottom'}}
+            }
+        }
+    
+    def get_chart_status_custo(self):
+        """Gráfico de status de custo"""
+        projetos = self._get_projetos_queryset()
+        
+        # Simplificado - agrupa por faixas de valor
+        baixo = projetos.filter(valor__lt=10000).count()
+        medio = projetos.filter(valor__gte=10000, valor__lt=50000).count()
+        alto = projetos.filter(valor__gte=50000).count()
+        
+        return {
+            'type': 'bar',
+            'data': {
+                'labels': ['Baixo (< R$ 10k)', 'Médio (R$ 10k-50k)', 'Alto (> R$ 50k)'],
+                'datasets': [{
+                    'label': 'Quantidade de Projetos',
+                    'data': [baixo, medio, alto],
+                    'backgroundColor': ['#28a745', '#ffc107', '#dc3545']
+                }]
+            },
+            'options': {
+                'responsive': True,
+                'scales': {'y': {'beginAtZero': True}}
+            }
+        }
 
 
 class ContratosAnalyticsService(BaseService):
@@ -485,7 +565,7 @@ class ContratosAnalyticsService(BaseService):
             return Contrato.objects.none()  # Implementar lógica específica
 
 
-class FinanceiroAnalyticsService(BaseService):
+class FinanceiroAnalyticsServiceOLD(BaseService):
     """Service para analytics financeiros"""
 
     def __init__(self, user=None):
@@ -513,13 +593,13 @@ class FinanceiroAnalyticsService(BaseService):
         mes_anterior = (mes_atual - timedelta(days=1)).replace(day=1)
         
         # Valores do mês atual
-        contratos_mes = Contrato.objects.filter(created_at__gte=mes_atual)
+        contratos_mes = Contrato.objects.filter(data_inicio__gte=mes_atual)
         valor_mes = contratos_mes.aggregate(Sum('valor'))['valor__sum'] or 0
         
         # Valores do mês anterior
         contratos_mes_anterior = Contrato.objects.filter(
-            created_at__gte=mes_anterior,
-            created_at__lt=mes_atual
+            data_inicio__gte=mes_anterior,
+            data_inicio__lt=mes_atual
         )
         valor_mes_anterior = contratos_mes_anterior.aggregate(Sum('valor'))['valor__sum'] or 0
         

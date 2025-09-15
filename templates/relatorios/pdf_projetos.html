@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Projetos - FUNETEC</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #089561;
+            padding-bottom: 15px;
+        }
+        
+        .header h1 {
+            color: #089561;
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .header .date {
+            color: #666;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background-color: #089561;
+            color: white;
+            padding: 10px 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 10px;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .valor {
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RELATÓRIO DE PROJETOS - FUNETEC</h1>
+        <div class="date">Gerado em: {{ data_geracao }}</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="15%">Código</th>
+                <th width="30%">Nome</th>
+                <th width="15%">Valor</th>
+                <th width="12%">Data Início</th>
+                <th width="12%">Data Encerramento</th>
+                <th width="16%">Situação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for projeto in projetos %}
+            <tr>
+                <td>{{ projeto.cod_projeto }}</td>
+                <td style="text-align: left;">{{ projeto.nome }}</td>
+                <td class="valor">R$ {{ projeto.valor|floatformat:2 }}</td>
+                <td>{{ projeto.data_inicio|date:"d/m/Y"|default:"N/A" }}</td>
+                <td>{{ projeto.data_encerramento|date:"d/m/Y"|default:"N/A" }}</td>
+                <td>{{ projeto.situacao_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">Nenhum projeto encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -4,24 +4,252 @@
 {% block page_title %}Analytics Financeiro{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm">
-    <div class="card-header">
-        <h5 class="mb-0">Resumo Financeiro</h5>
+<div class="row">
+    <div class="col-md-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                <h5 class="card-title">Receitas {{ resumo_financeiro.ano }}</h5>
+                <h3 class="text-success">R$ {{ resumo_financeiro.total_receitas|floatformat:2 }}</h3>
+                <small class="text-muted">Valores já recebidos</small>
+            </div>
+        </div>
     </div>
-    <div class="card-body">
-        <p>Ano: {{ resumo.ano }}</p>
-        <p>Total de Receitas: R$ {{ resumo.total_receitas|floatformat:2 }}</p>
-        <p>Total de Despesas: R$ {{ resumo.total_despesas|floatformat:2 }}</p>
-        <p><strong>Saldo: R$ {{ resumo.saldo|floatformat:2 }}</strong></p>
+    <div class="col-md-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-danger mb-2"></i>
+                <h5 class="card-title">Despesas {{ resumo_financeiro.ano }}</h5>
+                <h3 class="text-danger">R$ {{ resumo_financeiro.total_despesas|floatformat:2 }}</h3>
+                <small class="text-muted">Gastos registrados</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <i class="fas fa-balance-scale fa-2x text-{% if resumo_financeiro.saldo >= 0 %}success{% else %}danger{% endif %} mb-2"></i>
+                <h5 class="card-title">Saldo</h5>
+                <h3 class="text-{% if resumo_financeiro.saldo >= 0 %}success{% else %}danger{% endif %}">R$ {{ resumo_financeiro.saldo|floatformat:2 }}</h3>
+                <small class="text-muted">Receitas - Despesas</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <h5 class="card-title">A Receber</h5>
+                <h3 class="text-warning">R$ {{ total_pendente|default:"0.00"|floatformat:2 }}</h3>
+                <small class="text-muted">Valores em aberto</small>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="card shadow-sm mt-4">
-    <div class="card-header">
-        <h5 class="mb-0">Receitas e Despesas por Mês</h5>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>Informações dos Dados
+        </h5>
+        <a href="{% url 'contratos:parcela_list' %}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-eye me-1"></i>Ver Parcelas
+        </a>
     </div>
     <div class="card-body">
-        <p>Funcionalidade de gráfico em desenvolvimento.</p>
+        {% if resumo_financeiro.total_receitas == 0 %}
+        <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            <div>
+                <strong>Não há dados financeiros para exibir.</strong><br>
+                Os dados de receitas são baseados em pagamentos registrados nas parcelas de contratos. 
+                Para ver dados aqui, é necessário:
+                <ul class="mb-0 mt-2">
+                    <li>Ter contratos com parcelas cadastradas</li>
+                    <li>Registrar os pagamentos dessas parcelas</li>
+                    <li>Definir as datas de pagamento</li>
+                </ul>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <div>
+                <strong>Dados atualizados!</strong><br>
+                Exibindo informações financeiras baseadas nos pagamentos registrados.
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Fluxo de Caixa Mensal
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="fluxoCaixaChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Receitas por Mês
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="receitasChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Status de Pagamentos
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="inadimplenciaChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-doughnut me-2"></i>Impostos Estimados
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="impostosChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Configuração global dos gráficos
+Chart.defaults.responsive = true;
+Chart.defaults.maintainAspectRatio = false;
+Chart.defaults.plugins.legend.position = 'bottom';
+
+// Função para buscar dados da API
+function fetchChartData(chartType) {
+    return fetch(`{% url 'dashboard:chart_data_financeiro' %}?type=${chartType}`)
+        .then(response => response.json())
+        .catch(error => {
+            console.error('Erro ao carregar dados do gráfico:', error);
+            return null;
+        });
+}
+
+// Gráfico de Fluxo de Caixa
+fetchChartData('fluxo_caixa').then(data => {
+    if (data) {
+        const ctx = document.getElementById('fluxoCaixaChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Receitas vs Despesas por Mês'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Gráfico de Receitas Mensais
+fetchChartData('receitas').then(data => {
+    if (data) {
+        const ctx = document.getElementById('receitasChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Evolução das Receitas'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Gráfico de Inadimplência
+fetchChartData('inadimplencia').then(data => {
+    if (data) {
+        const ctx = document.getElementById('inadimplenciaChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Status das Parcelas'
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Gráfico de Impostos
+fetchChartData('impostos').then(data => {
+    if (data) {
+        const ctx = document.getElementById('impostosChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: data,
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Distribuição de Impostos'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

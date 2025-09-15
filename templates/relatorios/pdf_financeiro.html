@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Financeiro - FUNETEC</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #089561;
+            padding-bottom: 15px;
+        }
+        
+        .header h1 {
+            color: #089561;
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .header .date {
+            color: #666;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+        
+        .resumo {
+            background-color: #f8f9fa;
+            border: 1px solid #089561;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .resumo h2 {
+            color: #089561;
+            margin-top: 0;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .resumo-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        
+        .resumo-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            color: #089561;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background-color: #089561;
+            color: white;
+            padding: 10px 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        
+        td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 10px;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .valor {
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RELATÓRIO FINANCEIRO - FUNETEC</h1>
+        <div class="date">Gerado em: {{ data_geracao }}</div>
+    </div>
+
+    <div class="resumo">
+        <h2>RESUMO FINANCEIRO</h2>
+        <div class="resumo-item">
+            <span>Total Recebido:</span>
+            <span>R$ {{ resumo.total_recebido|floatformat:2 }}</span>
+        </div>
+        <div class="resumo-item">
+            <span>Total Previsto:</span>
+            <span>R$ {{ resumo.total_previsto|floatformat:2 }}</span>
+        </div>
+        <div class="resumo-item">
+            <span>Total Pendente:</span>
+            <span>R$ {{ resumo.total_pendente|floatformat:2 }}</span>
+        </div>
+        <div class="resumo-item">
+            <span>Taxa de Recebimento:</span>
+            <span>{{ resumo.taxa_recebimento|floatformat:1 }}%</span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th width="15%">Data</th>
+                <th width="15%">Contrato</th>
+                <th width="20%">Parcela</th>
+                <th width="15%">Valor Pago</th>
+                <th width="15%">Valor Total</th>
+                <th width="20%">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for parcela in parcelas %}
+            <tr>
+                <td>{{ parcela.data_pagamento|date:"d/m/Y"|default:"N/A" }}</td>
+                <td>{{ parcela.num_contrato.num_contrato|default:"N/A" }}</td>
+                <td>{{ parcela.num_parcela }}ª parcela</td>
+                <td class="valor">R$ {{ parcela.valor_pago|floatformat:2 }}</td>
+                <td class="valor">R$ {{ parcela.valor_parcela|floatformat:2 }}</td>
+                <td>{{ parcela.situacao_display }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">Nenhuma parcela paga encontrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
